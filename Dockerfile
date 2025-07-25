@@ -5,7 +5,7 @@ FROM php:8.2-fpm-alpine as base
 # Set direktori kerja di dalam container
 WORKDIR /var/www/html
 
-# Install dependensi sistem dan ekstensi PHP yang dibutuhkan Laravel
+# Install dependensi sistem (termasuk Node.js & npm) dan ekstensi PHP
 RUN apk add --no-cache \
     nginx \
     supervisor \
@@ -15,6 +15,8 @@ RUN apk add --no-cache \
     libpng-dev \
     libjpeg-turbo-dev \
     freetype-dev \
+    nodejs \
+    npm \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd pdo pdo_mysql zip bcmath
 
@@ -22,7 +24,6 @@ RUN apk add --no-cache \
 RUN rm -rf /var/cache/apk/*
 
 # Salin file konfigurasi Nginx dan Supervisor dari lokal ke container
-# Kita akan membuat file-file ini selanjutnya
 COPY .docker/nginx.conf /etc/nginx/http.d/default.conf
 COPY .docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
@@ -45,3 +46,4 @@ RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Buka port 80 (internal container) dan jalankan aplikasi
 EXPOSE 80
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
