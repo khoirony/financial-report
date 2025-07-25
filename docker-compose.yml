@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  app:
+    # Nama image akan sesuai dengan nama repo GitHub Anda
+    image: ghcr.io/nama-pengguna-github/nama-repo-anda:latest
+    container_name: laravel-app # Beri nama container yang jelas
+    restart: always
+    # TIDAK ADA 'ports'. Traefik akan menanganinya.
+    volumes:
+      - ./.env:/var/www/html/.env
+      - ./storage:/var/www/html/storage
+    networks:
+      - traefik_proxy # Nama jaringan eksternal yang sama dengan Traefik
+    labels:
+      # --- Konfigurasi untuk Traefik ---
+      - "traefik.enable=true"
+      # Router untuk trafik HTTPS ke domain Anda
+      - "traefik.http.routers.laravel-secure.rule=Host(`laravel.domain-anda.com`)"
+      - "traefik.http.routers.laravel-secure.entrypoints=websecure"
+      - "traefik.http.routers.laravel-secure.tls.certresolver=myresolver" # Ganti 'myresolver' jika nama resolver Let's Encrypt Anda berbeda
+      # Memberitahu Traefik port mana yang harus dituju di dalam container
+      - "traefik.http.services.laravel-service.loadbalancer.server.port=80"
+
+networks:
+  traefik_proxy:
+    name: root_default # Pastikan nama ini sesuai
+    external: true
