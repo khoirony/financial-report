@@ -1,28 +1,40 @@
 version: '3.8'
 
 services:
+  # Service untuk aplikasi Laravel (tidak berubah)
   app:
-    # Nama image akan sesuai dengan nama repo GitHub Anda
-    image: ghcr.io/nama-pengguna-github/nama-repo-anda:latest
-    container_name: laravel-app # Beri nama container yang jelas
+    image: ghcr.io/khoirony/financial-report:latest
+    container_name: laravel-app
     restart: always
-    # TIDAK ADA 'ports'. Traefik akan menanganinya.
     volumes:
       - ./.env:/var/www/html/.env
       - ./storage:/var/www/html/storage
     networks:
-      - traefik_proxy # Nama jaringan eksternal yang sama dengan Traefik
+      - traefik_proxy
     labels:
-      # --- Konfigurasi untuk Traefik ---
       - "traefik.enable=true"
-      # Router untuk trafik HTTPS ke domain Anda
       - "traefik.http.routers.laravel-secure.rule=Host(`laravel.domain-anda.com`)"
       - "traefik.http.routers.laravel-secure.entrypoints=websecure"
-      - "traefik.http.routers.laravel-secure.tls.certresolver=myresolver" # Ganti 'myresolver' jika nama resolver Let's Encrypt Anda berbeda
-      # Memberitahu Traefik port mana yang harus dituju di dalam container
+      - "traefik.http.routers.laravel-secure.tls.certresolver=myresolver"
       - "traefik.http.services.laravel-service.loadbalancer.server.port=80"
+
+  # --- TAMBAHKAN SERVICE DATABASE DI BAWAH INI ---
+  db:
+    image: mysql:8.0
+    container_name: laravel-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: Rony.12345678
+      MYSQL_DATABASE: financial-report
+      MYSQL_USER: root
+      MYSQL_PASSWORD: Rony.12345678
+    volumes:
+      - ./mysql-data:/var/lib/mysql  # Ini untuk menyimpan data database secara permanen
+    networks:
+      - traefik_proxy
+    # Port 3306 tidak diekspos ke publik untuk keamanan
 
 networks:
   traefik_proxy:
-    name: root_default # Pastikan nama ini sesuai
+    name: root_default
     external: true
