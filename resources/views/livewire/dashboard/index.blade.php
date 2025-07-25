@@ -1,7 +1,7 @@
 <div>
     <main class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="mb-10">
-            <h1 class="text-3xl font-semibold">Dashboard</h1>
+            <h1 class="text-3xl font-semibold">Dashboard Test</h1>
         </div>
         <!-- Summary Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
