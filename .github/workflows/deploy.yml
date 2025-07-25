@@ -19,6 +19,7 @@ jobs:
           registry: ghcr.io
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+          ecr: false
 
       - name: 3. Build and Push Docker Image
         uses: docker/build-push-action@v5
