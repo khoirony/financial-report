@@ -3,8 +3,13 @@ name: Build and Deploy Laravel to VPS
 on:
   push:
     branches:
-      - main # Jalankan workflow setiap ada push ke branch main
+      - main
   workflow_dispatch:
+
+# Variabel lingkungan agar mudah dikelola
+env:
+  # Nama image dibuat dari nama pemilik repo dan nama repo itu sendiri, diubah ke huruf kecil
+  IMAGE_NAME: ${{ github.repository_owner }}/${{ github.event.repository.name }}
 
 jobs:
   build-and-deploy:
@@ -17,27 +22,40 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          ecr: false
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }} # Menggunakan token otomatis dari GitHub
 
       - name: 3. Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          # Membuat tag image: ghcr.io/username/repo:latest
-          tags: ghcr.io/${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:latest
-
+          # Menggunakan nama image yang sudah didefinisikan di env dan diubah ke huruf kecil
+          tags: ghcr.io/${{ env.IMAGE_NAME }}:latest
+        
       - name: 4. Deploy di VPS via SSH
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@master # Disarankan menggunakan versi spesifik, misal @v1.0.3
         with:
           host: ${{ secrets.VPS_SSH_HOST }}
           username: ${{ secrets.VPS_SSH_USERNAME }}
           key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           script: |
+            # Menggunakan variabel agar mudah dibaca
+            IMAGE="ghcr.io/${{ env.IMAGE_NAME }}:latest"
+
+            echo "🚀 Memulai proses deployment..."
             cd /var/www/financial-report # Masuk ke direktori proyek di VPS
-            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login ghcr.io -u ${{ secrets.DOCKER_USERNAME }} --password-stdin # Login Docker di VPS
-            docker compose pull # Tarik image versi terbaru
-            docker compose up -d # Jalankan container dengan image baru
-            docker compose exec app php artisan migrate --force # Jalankan migrasi di dalam container
+
+            # Login ke GHCR menggunakan PAT (Personal Access Token)
+            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+            
+            echo "🐳 Menarik image terbaru: $IMAGE"
+            docker compose pull
+            
+            echo "🚀 Menjalankan container dengan image baru..."
+            docker compose up -d
+            
+            echo "🛠️ Menjalankan database migration..."
+            docker compose exec app php artisan migrate --force
+
+            echo "✨ Deployment selesai!"
