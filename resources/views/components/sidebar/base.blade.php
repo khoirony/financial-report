@@ -1,7 +1,11 @@
 @php
-    $url = parse_url(url()->current())['path'];
-    $arrayUrl = explode("/", $url);
-    $menuName = $arrayUrl[1];
+    $url = parse_url(url()->current())['path'] ?? null;
+    if($url){
+        $arrayUrl = explode("/", $url);
+        $menuName = $arrayUrl[1];
+    }else{
+        $menuName = 'dashboard';
+    }
 @endphp
 
 <aside x-cloak class="min-h-[100vh] bg-ghost-white z-20 -translate-x-[250px] lg:translate-x-0 lg:block transition-all" aria-label="Sidebar" id="menu" data-menu="false" x-bind:class="show ? 'w-56' : ''">

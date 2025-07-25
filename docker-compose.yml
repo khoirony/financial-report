@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # Service untuk aplikasi Laravel (tidak berubah)
+  # Service untuk aplikasi Laravel
   app:
     image: ghcr.io/khoirony/financial-report:latest
     container_name: laravel-app
@@ -13,12 +13,15 @@ services:
       - traefik_proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.laravel-secure.rule=Host(`laravel.domain-anda.com`)"
-      - "traefik.http.routers.laravel-secure.entrypoints=websecure"
-      - "traefik.http.routers.laravel-secure.tls.certresolver=myresolver"
-      - "traefik.http.services.laravel-service.loadbalancer.server.port=80"
+      - "traefik.http.routers.laravel.rule=PathPrefix(`/financial`)"
+      - "traefik.http.routers.laravel.entrypoints=web,websecure"
+      - "traefik.http.routers.laravel.tls=true"
+      - "traefik.http.routers.laravel.tls.certresolver=myresolver" # <-- PERHATIKAN BAGIAN INI
+      - "traefik.http.middlewares.laravel-stripprefix.stripprefix.prefixes=/financial"
+      - "traefik.http.routers.laravel.middlewares=laravel-stripprefix"
+      - "traefik.http.services.laravel.loadbalancer.server.port=80"
 
-  # --- TAMBAHKAN SERVICE DATABASE DI BAWAH INI ---
+  # Service untuk database
   db:
     image: mysql:8.0
     container_name: laravel-db
@@ -26,13 +29,12 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: Rony.12345678
       MYSQL_DATABASE: financial-report
-      MYSQL_USER: root
+      MYSQL_USER: rony
       MYSQL_PASSWORD: Rony.12345678
     volumes:
-      - ./mysql-data:/var/lib/mysql  # Ini untuk menyimpan data database secara permanen
+      - ./mysql-data:/var/lib/mysql
     networks:
       - traefik_proxy
-    # Port 3306 tidak diekspos ke publik untuk keamanan
 
 networks:
   traefik_proxy:

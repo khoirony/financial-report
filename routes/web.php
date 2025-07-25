@@ -16,8 +16,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::view('/', 'welcome')->name('home');
-Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+// Route::view('/', 'welcome')->name('home');
+Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('cashflow', [CashflowController::class, 'index'])->name('cashflow');
 Route::get('import', [CashflowController::class, 'import'])->name('import');
 
