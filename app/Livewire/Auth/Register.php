@@ -35,10 +35,8 @@ class Register extends Component
             'password' => Hash::make($this->password),
         ]);
 
-        // Login user secara otomatis setelah registrasi
         auth()->login($user);
 
-        // Redirect ke halaman utama
         return $this->redirect('/dashboard', navigate: true);
     }
 
