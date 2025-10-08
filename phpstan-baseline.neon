@@ -1,0 +1,19 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Call to an undefined method thiagoalessio\\TesseractOCR\\TesseractOCR\:\:lang\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Livewire/Cashflow/Import.php
+
+		-
+			message: '#^Relation ''category'' is not found in App\\Models\\Cashflow model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Livewire/Cashflow/Index.php
+
+		-
+			message: '#^Relation ''category'' is not found in App\\Models\\Cashflow model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Livewire/Dashboard/Index.php

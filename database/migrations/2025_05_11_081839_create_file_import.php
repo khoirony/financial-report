@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('path')->index();
             $table->timestamps();
             $table->softDeletes();
-            
+
             $table->foreign('user_id')->references('id')->on('users');
         });
     }

@@ -11,8 +11,11 @@ use Livewire\Component;
 class Register extends Component
 {
     public $name = '';
+
     public $email = '';
+
     public $password = '';
+
     public $password_confirmation = '';
 
     // Aturan validasi

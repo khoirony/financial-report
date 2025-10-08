@@ -3,10 +3,11 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CashflowController;
 use App\Http\Controllers\DashboardController;
+use App\Livewire\Portal;
 use App\Livewire\TestAlert;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,6 +28,7 @@ Route::get('/', function () {
 Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'register'])->name('register');
     Route::get('/login', [AuthController::class, 'login'])->name('login');
+    Route::get('/portal', Portal::class)->name('portal');
 });
 
 // Route yang memerlukan autentikasi
@@ -48,3 +50,5 @@ Route::middleware('auth')->group(function () {
         return redirect('/'); // Redirect ke halaman utama setelah logout
     })->name('logout');
 });
+
+// Route::get('/portal', Portal::class)->name('portal');

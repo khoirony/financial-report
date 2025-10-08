@@ -10,7 +10,9 @@ use Livewire\Component;
 class Login extends Component
 {
     public $email = '';
+
     public $password = '';
+
     public $remember = false;
 
     // Aturan validasi
@@ -26,13 +28,13 @@ class Login extends Component
 
         $credentials = [
             'email' => $this->email,
-            'password' => $this->password
+            'password' => $this->password,
         ];
 
         if (Auth::attempt($credentials, $this->remember)) {
             // Regenerate session untuk keamanan
             request()->session()->regenerate();
-            
+
             // Redirect ke halaman dashboard
             return $this->redirect('/dashboard', navigate: true);
         }

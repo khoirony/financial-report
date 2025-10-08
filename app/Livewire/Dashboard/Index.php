@@ -9,19 +9,24 @@ use Livewire\Component;
 class Index extends Component
 {
     public $categories;
+
     public $cashflows;
+
     public $income;
+
     public $expenses;
+
     public $expenseChartLabels;
+
     public $expenseChartData;
 
     public function mount()
     {
         $this->categories = Category::all();
-        $this->cashflows =  Cashflow::with('category')
-        ->where('user_id', 1)
-        ->orderBy('transaction_date')
-        ->get();
+        $this->cashflows = Cashflow::with('category')
+            ->where('user_id', 1)
+            ->orderBy('transaction_date')
+            ->get();
 
         $this->income = $this->cashflows->where('type_id', 1)->sum('amount');
         $this->expenses = $this->cashflows->where('type_id', 2)->sum('amount');

@@ -22,12 +22,12 @@ return new class extends Migration
             $table->string('destination_account')->index(); // Wajib isi
             $table->integer('amount')->index(); // Wajib isi
             $table->timestamps();
-        
+
             // Relasi
             $table->foreign('category_id')->references('id')->on('category');
             $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('type_id')->references('id')->on('type');
-        });        
+        });
     }
 
     /**

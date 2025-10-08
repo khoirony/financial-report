@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
@@ -11,8 +12,9 @@ class ExampleTest extends TestCase
      *
      * @return void
      */
-    public function testBasicTest()
+    public function test_basic_test()
     {
-        $this->get(route('home'))->assertSuccessful();
+        $user = User::factory()->create();
+        $this->actingAs($user)->get(route('dashboard'))->assertSuccessful();
     }
 }

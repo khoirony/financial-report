@@ -5,8 +5,6 @@ namespace App\Livewire\Cashflow;
 use App\Models\Cashflow;
 use App\Models\Category;
 use App\Models\FileImport;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Storage;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -14,14 +12,15 @@ use Livewire\WithPagination;
 
 class Index extends Component
 {
-    use LivewireAlert, WithPagination, WithFileUploads;
+    use LivewireAlert, WithFileUploads, WithPagination;
 
     public $cashflows;
+
     public $categories;
     // public $description;
 
     public $file;
-    
+
     public function mount()
     {
         $this->categories = Category::all();
@@ -51,16 +50,17 @@ class Index extends Component
         }
 
         Cashflow::where('id', $id)->update([
-            $field => $value
+            $field => $value,
         ]);
     }
 
     public function render()
     {
         $this->cashflows = Cashflow::with('category')
-                            ->where('user_id', 1)
-                            ->orderBy('transaction_date')
-                            ->get()->keyBy('id')->toArray(); 
+            ->where('user_id', 1)
+            ->orderBy('transaction_date')
+            ->get()->keyBy('id')->toArray();
+
         return view('livewire.cashflow.index');
     }
 }

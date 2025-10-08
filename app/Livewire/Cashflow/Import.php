@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Storage;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Smalot\PdfParser\Parser;
 use Spatie\PdfToText\Pdf;
 use thiagoalessio\TesseractOCR\TesseractOCR;
 
@@ -17,6 +16,7 @@ class Import extends Component
     use LivewireAlert, WithFileUploads;
 
     public $fileImports;
+
     public $import;
 
     public function mount()
@@ -35,8 +35,8 @@ class Import extends Component
             'import' => 'required', // max 10MB
         ]);
 
-        $path = 'cashflow/' . date('Y') . '/' . date('m');
-        $filename = uniqid() . '_' . $import->getClientOriginalName();
+        $path = 'cashflow/'.date('Y').'/'.date('m');
+        $filename = uniqid().'_'.$import->getClientOriginalName();
 
         try {
             // Store the file in S3
@@ -82,13 +82,13 @@ class Import extends Component
         $tempUrl = Storage::disk('s3')->temporaryUrl($file->path, now()->addMinutes(5));
 
         // Tentukan path sementara di server
-        $tempFilePath = storage_path('app/temp/' . basename($file->path));
+        $tempFilePath = storage_path('app/temp/'.basename($file->path));
 
         // Download file dari S3
         file_put_contents($tempFilePath, file_get_contents($tempUrl));
 
         // Convert PDF ke gambar per halaman menggunakan Imagick
-        $imagick = new Imagick();
+        $imagick = new \Imagick();
         $imagick->readImage($tempFilePath);
         $imagick->setResolution(300, 300);
         $imagick->setImageFormat('png');
@@ -145,10 +145,9 @@ class Import extends Component
             }
         }
 
-        dd($transactions);
         return response()->json([
             'status' => 'success',
-            'data' => $transactions
+            'data' => $transactions,
         ]);
 
         // $this->getPdfText($file->path);
@@ -164,7 +163,7 @@ class Import extends Component
             $tempUrl = Storage::disk('s3')->temporaryUrl($filename, now()->addMinutes(5));
 
             // Tentukan path sementara di server
-            $tempFilePath = storage_path('app/temp/' . basename($filename));
+            $tempFilePath = storage_path('app/temp/'.basename($filename));
 
             // Download file dari S3
             file_put_contents($tempFilePath, file_get_contents($tempUrl));
@@ -178,9 +177,9 @@ class Import extends Component
 
             // Proses teks untuk diubah menjadi format array
             $processedData = $this->processPdfText($rawText);
-            dd($processedData);
+
             return response()->json($processedData);
-            
+
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
@@ -197,28 +196,29 @@ class Import extends Component
 
         foreach ($lines as $line) {
             $line = trim($line);
-            
+
             // Cari header tabel
-            if (!$headerFound && strpos($line, 'Tanggal & Waktu') !== false) {
+            if (! $headerFound && strpos($line, 'Tanggal & Waktu') !== false) {
                 $headerFound = true;
+
                 continue;
             }
-            
+
             // Mulai mengumpulkan data transaksi setelah header ditemukan
             if ($headerFound) {
                 // Skip baris kosong atau informasi non-transaksi
-                if (empty($line) || 
-                    strpos($line, 'Halaman') !== false || 
+                if ($line === '' ||
+                    strpos($line, 'Halaman') !== false ||
                     strpos($line, 'Menampilkan transaksi') !== false ||
                     strpos($line, 'Saldo terbaru') !== false ||
                     strpos($line, 'Info Penting') !== false) {
                     continue;
                 }
-                
+
                 // Deteksi tanggal transaksi (format: 25 Feb 2025)
                 if (preg_match('/^\d{1,2} [A-Za-z]{3} \d{4}$/', $line)) {
                     // Jika ada transaksi sebelumnya, simpan
-                    if (!empty($currentTransaction)) {
+                    if (! empty($currentTransaction)) {
                         $transactions[] = $currentTransaction;
                         $currentTransaction = [];
                     }
@@ -229,26 +229,26 @@ class Import extends Component
                     $currentTransaction['waktu'] = str_replace('.', ':', $line);
                 }
                 // Deteksi sumber/tujuan (baris pertama setelah tanggal/waktu)
-                elseif (!isset($currentTransaction['sumber_tujuan']) && 
-                        !empty($line) && 
-                        !isset($currentTransaction['waktu']) && 
-                        !preg_match('/^ID#/', $line) &&
-                        !preg_match('/^[+-]?\d+\.\d{3}/', $line)) {
+                elseif (! isset($currentTransaction['sumber_tujuan']) &&
+                        ! empty($line) &&
+                        ! isset($currentTransaction['waktu']) &&
+                        ! preg_match('/^ID#/', $line) &&
+                        ! preg_match('/^[+-]?\d+\.\d{3}/', $line)) {
                     $currentTransaction['sumber_tujuan'] = $line;
                 }
                 // Deteksi deskripsi transaksi
-                elseif (strpos($line, 'SHOPEE') !== false || 
-                    strpos($line, 'Bibit') !== false || 
+                elseif (strpos($line, 'SHOPEE') !== false ||
+                    strpos($line, 'Bibit') !== false ||
                     strpos($line, 'Pencairan Reksa Dana') !== false ||
                     strpos($line, 'PT Tokopedia') !== false) {
                     $currentTransaction['deskripsi'] = $line;
                 }
                 // Deteksi jumlah (nominal dengan + atau -)
-                elseif (preg_match('/^[+-]\d+\.\d{3}/', $line) && !isset($currentTransaction['jumlah'])) {
+                elseif (preg_match('/^[+-]\d+\.\d{3}/', $line) && ! isset($currentTransaction['jumlah'])) {
                     $currentTransaction['jumlah'] = str_replace('.', ',', $line);
                 }
                 // Deteksi saldo (nominal tanpa + atau -)
-                elseif (preg_match('/^\d+\.\d{3}/', $line) && isset($currentTransaction['jumlah']) && !isset($currentTransaction['saldo'])) {
+                elseif (preg_match('/^\d+\.\d{3}/', $line) && isset($currentTransaction['jumlah']) && ! isset($currentTransaction['saldo'])) {
                     $currentTransaction['saldo'] = str_replace('.', ',', $line);
                     $transactions[] = $currentTransaction;
                     $currentTransaction = [];
@@ -258,7 +258,7 @@ class Import extends Component
 
         // Format output sesuai yang diminta
         $result = [
-            ['No', 'Tanggal', 'Waktu', 'Sumber/Tujuan', 'Deskripsi', 'Jumlah', 'Saldo']
+            ['No', 'Tanggal', 'Waktu', 'Sumber/Tujuan', 'Deskripsi', 'Jumlah', 'Saldo'],
         ];
 
         foreach ($transactions as $index => $transaction) {
@@ -269,13 +269,12 @@ class Import extends Component
                 $transaction['sumber_tujuan'] ?? '',
                 $transaction['deskripsi'] ?? '',
                 $transaction['jumlah'] ?? '',
-                $transaction['saldo'] ?? ''
+                $transaction['saldo'] ?? '',
             ];
         }
 
         return $result;
     }
-
 
     // public function extractText($filePath)
     // {
@@ -308,7 +307,6 @@ class Import extends Component
     //     }
     // }
 
-
     public function delete($id)
     {
         $file = FileImport::find($id);
@@ -316,9 +314,10 @@ class Import extends Component
         if (! $file) {
             $this->alert('error', 'File not found!', [
                 'position' => 'top-end',
-                'timer'    => 3000,
-                'toast'    => true,
+                'timer' => 3000,
+                'toast' => true,
             ]);
+
             return;
         }
 
@@ -335,18 +334,17 @@ class Import extends Component
             // Alert sukses
             $this->alert('success', 'File successfully deleted!', [
                 'position' => 'top-end',
-                'timer'    => 3000,
-                'toast'    => true,
+                'timer' => 3000,
+                'toast' => true,
             ]);
         } catch (\Exception $e) {
             $this->alert('error', 'Failed to delete file: '.$e->getMessage(), [
                 'position' => 'top-end',
-                'timer'    => 4000,
-                'toast'    => true,
+                'timer' => 4000,
+                'toast' => true,
             ]);
         }
     }
-
 
     public function render()
     {
