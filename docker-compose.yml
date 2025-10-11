@@ -34,7 +34,29 @@ services:
     networks:
       - traefik_proxy
     ports:
-      - "3306:3306"
+      - "3307:3306"
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: always
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - traefik_proxy
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: always
+    volumes:
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    ports:
+      - "3002:3000"
+    networks:
+      - traefik_proxy
 
 networks:
   traefik_proxy:
