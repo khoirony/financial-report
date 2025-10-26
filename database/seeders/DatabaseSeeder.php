@@ -3,12 +3,11 @@
 namespace Database\Seeders;
 
 use App\Models\Cashflow;
-use App\Models\Category;
-use App\Models\Role;
-use App\Models\Type;
+use App\Models\CashflowCategory;
+use App\Models\CashflowType;
 use App\Models\User;
+use App\Models\UserRole;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
@@ -19,11 +18,11 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // ===== ROLE =====
-        $adminRole = Role::create([
+        $adminRole = UserRole::create([
             'name' => 'Admin',
             'description' => 'Administrator with full access',
         ]);
-        $userRole = Role::create([
+        $userRole = UserRole::create([
             'name' => 'User',
             'description' => 'Regular user with limited access',
         ]);
@@ -44,15 +43,15 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // ===== TYPE =====
-        $incomeType = Type::create(['name' => 'Income']);
-        $spendingType = Type::create(['name' => 'Spending']);
+        $incomeType = CashflowType::create(['name' => 'Income']);
+        $spendingType = CashflowType::create(['name' => 'Spending']);
 
         // ===== CATEGORY =====
-        $salary = Category::create(['name' => 'Salary', 'type_id' => $incomeType->id]);
-        $food = Category::create(['name' => 'Food', 'type_id' => $spendingType->id]);
-        $groceries = Category::create(['name' => 'Groceries', 'type_id' => $spendingType->id]);
-        $items = Category::create(['name' => 'Items', 'type_id' => $spendingType->id]);
-        $entertainment = Category::create(['name' => 'Entertainment', 'type_id' => $spendingType->id]);
+        $salary = CashflowCategory::create(['name' => 'Salary', 'cashflow_type_id' => $incomeType->id]);
+        $food = CashflowCategory::create(['name' => 'Food', 'cashflow_type_id' => $spendingType->id]);
+        $groceries = CashflowCategory::create(['name' => 'Groceries', 'cashflow_type_id' => $spendingType->id]);
+        $items = CashflowCategory::create(['name' => 'Items', 'cashflow_type_id' => $spendingType->id]);
+        $entertainment = CashflowCategory::create(['name' => 'Entertainment', 'cashflow_type_id' => $spendingType->id]);
 
         // ===== CASHFLOW DUMMY (3 BULAN) =====
         $categories = [$food, $groceries, $items, $entertainment];
@@ -66,7 +65,7 @@ class DatabaseSeeder extends Seeder
             $date = $startDate->copy()->addMonths($month)->startOfMonth()->addDays(1);
             $cashflows[] = [
                 'user_id' => $rony->id,
-                'category_id' => $salary->id,
+                'cashflow_category_id' => $salary->id,
                 'transaction_date' => $date,
                 'description' => 'Monthly Salary',
                 'source_account' => 'Farcapital',
@@ -93,7 +92,7 @@ class DatabaseSeeder extends Seeder
 
                 $cashflows[] = [
                     'user_id' => $rony->id,
-                    'category_id' => $category->id,
+                    'cashflow_category_id' => $category->id,
                     'transaction_date' => $current->copy()->setTime(rand(8, 20), rand(0, 59)),
                     'description' => $desc,
                     'source_account' => 'Bank Jago',

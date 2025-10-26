@@ -5,24 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Cashflow extends Model
+class Investment extends Model
 {
     use HasFactory;
 
-    protected $table = 'cashflows';
+    protected $table = 'investments';
 
     protected $fillable = [
         'user_id',
-        'cashflow_category_id',
-        'transaction_date',
-        'description',
-        'source_account',
-        'destination_account',
-        'amount',
-    ];
-
-    protected $casts = [
-        'transaction_date' => 'date:Y-m-d',
+        'investment_category_id',
+        'name',
+        'buying_price',
+        'current_price',
+        'broker',
     ];
 
     public function category()

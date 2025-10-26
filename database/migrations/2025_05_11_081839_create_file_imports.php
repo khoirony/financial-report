@@ -11,13 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('category', function (Blueprint $table) {
+        Schema::create('file_imports', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->nullable()->index();
-            $table->unsignedBigInteger('type_id')->nullable()->index();
+            $table->unsignedBigInteger('user_id')->index();
+            $table->string('filename')->index();
+            $table->integer('size')->index();
+            $table->string('path')->index();
             $table->timestamps();
+            $table->softDeletes();
 
-            $table->foreign('type_id')->references('id')->on('type')->nullOnDelete();
+            $table->foreign('user_id')->references('id')->on('users');
         });
     }
 
@@ -26,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('category');
+        Schema::dropIfExists('file_import');
     }
 };

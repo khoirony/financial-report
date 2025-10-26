@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cashflow', function (Blueprint $table) {
+        Schema::create('cashflows', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id')->index(); // Wajib isi
-            $table->unsignedBigInteger('category_id')->nullable()->index();
+            $table->unsignedBigInteger('cashflow_category_id')->nullable()->index();
             $table->datetime('transaction_date')->nullable()->index();
             $table->string('description')->nullable()->index();
             $table->string('source_account')->nullable()->index();
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->timestamps();
 
             // Relasi
-            $table->foreign('category_id')->references('id')->on('category')->nullOnDelete();
+            $table->foreign('cashflow_category_id')->references('id')->on('cashflow_categories')->nullOnDelete();
             $table->foreign('user_id')->references('id')->on('users');
         });
     }
@@ -33,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cashflow');
+        Schema::dropIfExists('cashflows');
     }
 };

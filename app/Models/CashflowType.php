@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Type extends Model
+class CashflowType extends Model
 {
     use HasFactory;
 
@@ -13,7 +13,7 @@ class Type extends Model
     public const SPENDING = 2;
     public const INVESTMENT = 3;
 
-    protected $table = 'type';
+    protected $table = 'cashflow_types';
 
     protected $fillable = [
         'name',

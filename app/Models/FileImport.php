@@ -10,7 +10,7 @@ class FileImport extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'file_import';
+    protected $table = 'file_imports';
 
     protected $fillable = [
         'user_id',

@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Category extends Model
+class CashflowCategory extends Model
 {
     use HasFactory;
 
@@ -16,15 +16,15 @@ class Category extends Model
     public const ITEMS = 5;
     public const ENTERTAINMENT = 6;
 
-    protected $table = 'category';
+    protected $table = 'cashflow_categories';
 
     protected $fillable = [
         'name',
-        'type_id',
+        'cashflow_type_id',
     ];
     
     public function type()
     {
-        return $this->belongsTo(Category::class, 'type_id');
+        return $this->belongsTo(CashflowType::class, 'cashflow_type_id');
     }
 }
