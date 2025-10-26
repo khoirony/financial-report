@@ -41,7 +41,7 @@ Route::middleware('auth')->group(function () {
         return app(TestAlert::class);
     });
 
-    Route::get('/logout', function (Request $request) {
+    Route::post('/logout', function (Request $request) {
         Auth::logout();
 
         $request->session()->invalidate();

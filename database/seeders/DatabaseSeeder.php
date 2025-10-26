@@ -46,7 +46,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Rony',
             'email' => 'khoironyarief08@gmail.com',
             'password' => bcrypt('password1234'),
-            'role_id' => 1,
+            'role_id' => 2,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -57,17 +57,10 @@ class DatabaseSeeder extends Seeder
         Type::create([
             'name' => 'Spending',
         ]);
-        Type::create([
-            'name' => 'Investment',
-        ]);
 
         Category::create([
             'name' => 'Salary',
             'type_id' => 1,
-        ]);
-        Category::create([
-            'name' => 'Investment',
-            'type_id' => 3,
         ]);
         Category::create([
             'name' => 'Food',
@@ -97,7 +90,7 @@ class DatabaseSeeder extends Seeder
         ]);
         Cashflow::create([
             'user_id' => 2,
-            'category_id' => 3,
+            'category_id' => 2,
             'transaction_date' => '2025-04-25 13:00:00',
             'description' => 'Gofood',
             'source_account' => 'Bank Jago',
@@ -106,7 +99,7 @@ class DatabaseSeeder extends Seeder
         ]);
         Cashflow::create([
             'user_id' => 2,
-            'category_id' => 3,
+            'category_id' => 2,
             'transaction_date' => '2025-04-26 15:00:00',
             'description' => 'Belanja Bulanan',
             'source_account' => 'Bank Jago',

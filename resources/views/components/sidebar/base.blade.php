@@ -1,19 +1,17 @@
 @php
-    $url = parse_url(url()->current())['path'] ?? null;
-    if($url){
-        $arrayUrl = explode("/", $url);
-        $menuName = $arrayUrl[1];
-    }else{
-        $menuName = 'dashboard';
-    }
+    $url = parse_url(url()->current())['path'];
+    $arrayUrl = explode('/', $url);
+    $menuName = $arrayUrl[1];
 @endphp
 
-<aside x-cloak class="min-h-[100vh] bg-ghost-white z-20 -translate-x-[250px] lg:translate-x-0 lg:block transition-all" aria-label="Sidebar" id="menu" data-menu="false" x-bind:class="show ? 'w-56' : ''">
+<aside x-cloak
+    class="h-full bg-white shadow-sm fixed top-16 z-20 -translate-x-[250px] lg:translate-x-0 lg:block border-t lg:border-t-0 transition-all"
+    aria-label="Sidebar" id="menu" data-menu="false" x-bind:class="show ? 'w-56' : ''">
 
     <div class="sticky px-3 py-4 h-[85vh] overflow-x-visible rounded" :class="show && 'w-56'">
 
         <div :class="show ? 'justify-between' : 'justify-center'" class="flex px-2 py-5 items-center mb-4">
-            <p x-show="show" class="text-coolgray-900 font-bold text-base">Financial-Report</p>
+            <p x-show="show" class="text-coolgray-900 font-bold text-base">Minimize</p>
             <button @click="show = !show" class="hidden lg:flex justify-center">
                 <span :class="show ? '' : 'rotate-180'">
                     <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -24,7 +22,7 @@
         </div>
 
         {{-- List item --}}
-        <ul class="space-y-4 list-none mt-10">
+        <ul class="space-y-4 list-none">
             <li class="list-none">
                 <x-sidebar.item title="Dashboard" menuName='{{$menuName}}' active='dashboard' route="dashboard">
                     <i class="text-xl text-[#700018] fas fa-chart-simple"></i>
@@ -40,6 +38,7 @@
                     <i class="text-xl text-[#700018] fas fa-file-import"></i>
                 </x-sidebar.item>
             </li>
+            {{-- @dump(auth()->user()->role_id == App\Models\Role::ADMIN) --}}
         </ul>
     </div>
 </aside>
