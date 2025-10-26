@@ -1,7 +1,7 @@
 <nav class="sticky top-0 z-30 flex-none py-3.5 px-3 lg:px-5 w-full mx-auto bg-white shadow-sm">
     <div class="flex justify-between items-center">
         <div class="order-2 lg:order-1 self-center items-center">
-            <a href="route('home')" class="font-bold text-2xl">
+            <a href="/" class="font-bold text-2xl">
                 Financial Report
             </a>
         </div>
@@ -15,7 +15,7 @@
                 </button>
             </div>
         </div>
-        <div class="order-3">
+        <div class="order-3 mr-3">
             <div x-data="{show: false}" @click.away="show = false" class="relative">
                 <button x-on:click="show = !show" class="flex justify-start items-center gap-2.5">
                     <p class="text-prediction font-medium text-sm hidden lg:flex">{{ auth()->user()->name }}</p>
