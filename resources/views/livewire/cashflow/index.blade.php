@@ -2,7 +2,7 @@
     <main class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="mb-10 flex justify-between">
             <h1 class="text-3xl font-semibold">Manage Cashflow</h1>
-            <button class="rounded-lg px-4 py-2 border border-quick-silver">Add New Cashflow</button>
+            <button wire:click="addNewCashflow" class="rounded-lg px-4 py-2 border border-quick-silver cursor-pointer">Add New Cashflow</button>
         </div>
 
         <!-- Transactions Table -->
@@ -10,10 +10,11 @@
             <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                 <h2 class="text-lg font-semibold text-gray-900">All Transactions</h2>
                 <div class="relative">
-                    <select x-model="transactionFilter" @change="filterTransactions" class="block appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
-                        <option value="all">All Transactions</option>
-                        <option value="income">Income Only</option>
-                        <option value="expense">Expenses Only</option>
+                    <select wire:model.lazy="filterCategory" class="block appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                        <option value="">All Transactions</option>
+                        @foreach ($categories as $category)
+                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                        @endforeach
                     </select>
                 </div>
             </div>
@@ -38,8 +39,8 @@
                                     <input type="text" wire:model.lazy="cashflows.{{ $id }}.description" class="rounded border-none ring-0 text-sm font-light">
                                 </x-table.data>
                                 <x-table.data>
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $cashflow['type_id'] === 1 ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800' }}">
-                                        <select wire:model.lazy="cashflows.{{ $id }}.category_id" class="rounded-full border-none ring-0 text-sm font-light {{ $cashflow['type_id'] === 1 ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800' }}">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $cashflow['category_id'] === 1 ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800' }}">
+                                        <select wire:model.lazy="cashflows.{{ $id }}.category_id" class="rounded-full border-none ring-0 text-sm font-light {{ $cashflow['category_id'] === 1 ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800' }}">
                                             @foreach ($categories as $category)
                                                 <option value="{{ $category->id }}">{{ $category->name }}</option>
                                             @endforeach

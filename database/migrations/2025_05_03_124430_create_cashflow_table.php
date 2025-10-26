@@ -15,18 +15,16 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id')->index(); // Wajib isi
             $table->unsignedBigInteger('category_id')->nullable()->index();
-            $table->unsignedBigInteger('type_id')->nullable()->index();
             $table->datetime('transaction_date')->nullable()->index();
             $table->string('description')->nullable()->index();
             $table->string('source_account')->nullable()->index();
-            $table->string('destination_account')->index(); // Wajib isi
-            $table->integer('amount')->index(); // Wajib isi
+            $table->string('destination_account')->nullable()->index();
+            $table->integer('amount')->default(0)->index();
             $table->timestamps();
 
             // Relasi
-            $table->foreign('category_id')->references('id')->on('category');
+            $table->foreign('category_id')->references('id')->on('category')->nullOnDelete();
             $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('type_id')->references('id')->on('type');
         });
     }
 

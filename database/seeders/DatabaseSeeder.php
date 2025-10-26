@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Cashflow;
 use App\Models\Category;
+use App\Models\Role;
 use App\Models\Type;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -19,35 +20,35 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => Hash::make('password123'),
+        Role::create([
+            'name' => 'Admin',
+            'description' => 'Administrator with full access',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        Role::create([
+            'name' => 'User',
+            'description' => 'Regular user with limited access',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
-        Category::create([
-            'name' => 'Salary',
+        
+        User::create([
+            'name' => 'Admin',
+            'email' => 'admin@admin.com',
+            'password' => bcrypt('password1234'),
+            'role_id' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
-        Category::create([
-            'name' => 'Investment',
-        ]);
-
-        Category::create([
-            'name' => 'Food',
-        ]);
-        Category::create([
-            'name' => 'Groceries',
-        ]);
-        Category::create([
-            'name' => 'Items',
-        ]);
-        Category::create([
-            'name' => 'Entertainment',
-        ]);
-        Category::create([
-            'name' => 'Food',
+        User::create([
+            'name' => 'Rony',
+            'email' => 'khoironyarief08@gmail.com',
+            'password' => bcrypt('password1234'),
+            'role_id' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         Type::create([
@@ -56,11 +57,38 @@ class DatabaseSeeder extends Seeder
         Type::create([
             'name' => 'Spending',
         ]);
+        Type::create([
+            'name' => 'Investment',
+        ]);
+
+        Category::create([
+            'name' => 'Salary',
+            'type_id' => 1,
+        ]);
+        Category::create([
+            'name' => 'Investment',
+            'type_id' => 3,
+        ]);
+        Category::create([
+            'name' => 'Food',
+            'type_id' => 2,
+        ]);
+        Category::create([
+            'name' => 'Groceries',
+            'type_id' => 2,
+        ]);
+        Category::create([
+            'name' => 'Items',
+            'type_id' => 2,
+        ]);
+        Category::create([
+            'name' => 'Entertainment',
+            'type_id' => 2,
+        ]);
 
         Cashflow::create([
-            'user_id' => 1,
+            'user_id' => 2,
             'category_id' => 1,
-            'type_id' => 1,
             'transaction_date' => '2025-04-25 08:00:00',
             'description' => 'Pendapatan',
             'source_account' => 'Farcapital',
@@ -68,9 +96,8 @@ class DatabaseSeeder extends Seeder
             'amount' => 35000000,
         ]);
         Cashflow::create([
-            'user_id' => 1,
+            'user_id' => 2,
             'category_id' => 3,
-            'type_id' => 2,
             'transaction_date' => '2025-04-25 13:00:00',
             'description' => 'Gofood',
             'source_account' => 'Bank Jago',
@@ -78,9 +105,8 @@ class DatabaseSeeder extends Seeder
             'amount' => 27800,
         ]);
         Cashflow::create([
-            'user_id' => 1,
+            'user_id' => 2,
             'category_id' => 3,
-            'type_id' => 2,
             'transaction_date' => '2025-04-26 15:00:00',
             'description' => 'Belanja Bulanan',
             'source_account' => 'Bank Jago',
