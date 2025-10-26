@@ -16,8 +16,9 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id')->index(); // Wajib isi
             $table->unsignedBigInteger('investment_category_id')->nullable()->index();
             $table->string('name')->nullable()->index();
-            $table->integer('buying_price')->nullable()->index();
-            $table->integer('current_price')->nullable()->index();
+            $table->decimal('average_buying_price', 20, 2)->nullable()->index();
+            $table->decimal('current_price', 20, 2)->nullable()->index();
+            $table->decimal('amount', 20, 4)->nullable()->index();
             $table->string('broker')->nullable()->index();
             $table->timestamps();
 

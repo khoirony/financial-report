@@ -3,7 +3,7 @@
 namespace App\Livewire\Dashboard;
 
 use App\Models\Cashflow;
-use App\Models\Category;
+use App\Models\CashflowCategory;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -28,23 +28,24 @@ class Index extends Component
     public $expenseMonthData;
 
     public $filterCategory = '';
+    
     public $filterPieMonthYear;
 
     public function mount()
     {
-        $this->categories = Category::all();
+        $this->categories = CashflowCategory::all();
         $this->filterPieMonthYear = $this->filterPieMonthYear ?? now()->format('Y-m');
 
         $this->cashflows = Cashflow::with('category')
             ->where('user_id', Auth::user()->id)
             ->when($this->filterCategory, function ($query) {
-                $query->where('category_id', $this->filterCategory);
+                $query->where('cashflow_category_id', $this->filterCategory);
             })
             ->orderByDesc('transaction_date')
             ->get();
 
-        $this->income = $this->cashflows->where('category_id', 1)->sum('amount');
-        $this->expenses = $this->cashflows->where('category.type_id', 2)->sum('amount');
+        $this->income = $this->cashflows->where('cashflow_category_id', 1)->sum('amount');
+        $this->expenses = $this->cashflows->where('category.cashflow_type_id', 2)->sum('amount');
 
         // Chart Pie Expense by Category
         [$year, $month] = explode('-', $this->filterPieMonthYear);
@@ -53,7 +54,7 @@ class Index extends Component
             ->where('user_id', Auth::user()->id)
             ->whereMonth('transaction_date', $month)
             ->whereYear('transaction_date', $year)
-            ->whereHas('category', fn($q) => $q->where('type_id', 2))
+            ->whereHas('category', fn($q) => $q->where('cashflow_type_id', 2))
             ->get()
             ->groupBy('category.name')
             ->map(fn($items) => $items->sum('amount'));
@@ -63,7 +64,7 @@ class Index extends Component
 
         // Chart Line Expense by Month
         $expenseByMonth = Cashflow::where('user_id', Auth::user()->id)
-        ->whereHas('category', fn($q) => $q->where('type_id', 2)) // hanya pengeluaran
+        ->whereHas('category', fn($q) => $q->where('cashflow_type_id', 2)) // hanya pengeluaran
         ->selectRaw('DATE_FORMAT(transaction_date, "%Y-%m") as ym, SUM(amount) as total')
         ->groupBy('ym')
         ->orderBy('ym')
@@ -85,7 +86,7 @@ class Index extends Component
             ->where('user_id', Auth::user()->id)
             ->whereMonth('transaction_date', $month)
             ->whereYear('transaction_date', $year)
-            ->whereHas('category', fn($q) => $q->where('type_id', 2))
+            ->whereHas('category', fn($q) => $q->where('cashflow_type_id', 2))
             ->get()
             ->groupBy('category.name')
             ->map(fn($items) => $items->sum('amount'));

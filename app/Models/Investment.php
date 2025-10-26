@@ -15,8 +15,9 @@ class Investment extends Model
         'user_id',
         'investment_category_id',
         'name',
-        'buying_price',
+        'average_buying_price',
         'current_price',
+        'amount',
         'broker',
     ];
 

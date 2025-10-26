@@ -13,7 +13,7 @@ class InvestmentCategory extends Model
     public const CRYPTO = 2;
     public const INDEX = 3;
     public const REKSADANA = 4;
-    public const EMAS = 5;
+    public const GOLD = 5;
 
     protected $table = 'investment_categories';
 

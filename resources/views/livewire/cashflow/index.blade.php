@@ -39,8 +39,8 @@
                                     <input type="text" wire:model.lazy="cashflows.{{ $id }}.description" class="rounded border-none ring-0 text-sm font-light">
                                 </x-table.data>
                                 <x-table.data>
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $cashflow['category_id'] === 1 ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800' }}">
-                                        <select wire:model.lazy="cashflows.{{ $id }}.category_id" class="rounded-full border-none ring-0 text-sm font-light {{ $cashflow['category_id'] === 1 ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800' }}">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $cashflow['cashflow_category_id'] === 1 ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800' }}">
+                                        <select wire:model.lazy="cashflows.{{ $id }}.cashflow_category_id" class="rounded-full border-none ring-0 text-sm font-light {{ $cashflow['cashflow_category_id'] === 1 ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800' }}">
                                             @foreach ($categories as $category)
                                                 <option value="{{ $category->id }}">{{ $category->name }}</option>
                                             @endforeach

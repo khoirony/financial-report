@@ -3,8 +3,7 @@
 namespace App\Livewire\Cashflow;
 
 use App\Models\Cashflow;
-use App\Models\Category;
-use App\Models\FileImport;
+use App\Models\CashflowCategory;
 use Illuminate\Support\Facades\Auth;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Livewire\Component;
@@ -18,14 +17,14 @@ class Index extends Component
     public $cashflows;
 
     public $categories;
+
     public $filterCategory = '';
-    // public $description;
 
     public $file;
 
     public function mount()
     {
-        $this->categories = Category::all();
+        $this->categories = CashflowCategory::all();
     }
 
     public function delete($id)
@@ -58,8 +57,7 @@ class Index extends Component
     {
         $newCashflow = Cashflow::create([
             'user_id' => Auth::user()->id,
-            'category_id' => 1,
-            'type_id' => 1,
+            'cashflow_category_id' => 1,
             'description' => '',
             'amount' => 0,
             'transaction_date' => now(),
@@ -73,7 +71,7 @@ class Index extends Component
         $this->cashflows = Cashflow::with('category')
             ->where('user_id', Auth::user()->id)
             ->when($this->filterCategory, function ($query) {
-                $query->where('category_id', $this->filterCategory);
+                $query->where('cashflow_category_id', $this->filterCategory);
             })
             ->orderByDesc('transaction_date')
             ->get()->keyBy('id')->toArray();
