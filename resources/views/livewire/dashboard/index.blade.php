@@ -57,8 +57,20 @@
             <div class="bg-white rounded-lg border border-bright-gray p-6">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-lg font-semibold text-gray-900">Expenses Breakdown</h2>
+                    <div class="mb-4">
+                        <select id="filterPieMonthYear" wire:model.live="filterPieMonthYear" class="border rounded p-2">
+                            @foreach(range(0, 11) as $i)
+                                @php
+                                    $date = now()->subMonths($i);
+                                @endphp
+                                <option value="{{ $date->format('Y-m') }}">
+                                    {{ $date->translatedFormat('F Y') }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
-                <div class="h-64" x-data x-init="renderChart(@json($expenseChartLabels), @json($expenseChartData))">
+                <div class="h-64" wire:ignore x-init="renderDoughnutChart(@json($expenseChartLabels), @json($expenseChartData))">
                     <canvas id="doughnutChart"></canvas>
                 </div>
             </div>
@@ -66,7 +78,7 @@
             <!-- Monthly Trend -->
             <div class="bg-white rounded-lg border border-bright-gray p-6">
                 <h2 class="text-lg font-semibold text-gray-900 mb-4">Monthly Trend</h2>
-                <div class="h-64">
+                <div class="h-64" wire:ignore x-init="renderLineChart(@json($expenseMonthLabels), @json($expenseMonthData))">
                     <canvas id="lineChart"></canvas>
                 </div>
             </div>
@@ -179,24 +191,27 @@
             </div>
         </div>
     </main>
-
-    <script>
-        document.addEventListener('livewire:navigated', () => {
-            // Ambil data dari window, atau Livewire props (misalnya via Alpine)
-            const labels = @json($expenseChartLabels);
-            const data = @json($expenseChartData);
-    
-            renderChart(labels, data);
-        });
-    </script>
     
     <script>
         let myDoughnutChart;
+        let myLineChart;
     
-        function renderChart(labels, data) {
+        document.addEventListener('livewire:navigated', () => {
+            // Render chart saat halaman pertama kali dimuat
+            renderDoughnutChart(@json($expenseChartLabels), @json($expenseChartData));
+            renderLineChart(@json($expenseMonthLabels), @json($expenseMonthData));
+        });
+    
+        // 🔥 Event listener dari Livewire v3
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('update-doughnut-chart', (data) => {
+                renderDoughnutChart(data[0].labels, data[0].data);
+            });
+        });
+    
+        function renderDoughnutChart(labels, data) {
             const ctx = document.getElementById('doughnutChart').getContext('2d');
     
-            // Hapus chart sebelumnya jika ada
             if (myDoughnutChart) {
                 myDoughnutChart.destroy();
             }
@@ -208,7 +223,10 @@
                     datasets: [{
                         label: 'Pengeluaran',
                         data: data,
-                        backgroundColor: ['#f87171', '#60a5fa', '#facc15'],
+                        backgroundColor: [
+                            '#f87171', '#60a5fa', '#facc15',
+                            '#34d399', '#a78bfa', '#f472b6'
+                        ],
                         borderWidth: 1
                     }]
                 },
@@ -216,40 +234,41 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'right',
-                        }
+                        legend: { position: 'right' }
+                    }
+                }
+            });
+        }
+    
+        function renderLineChart(labels, data) {
+            const lineCtx = document.getElementById('lineChart').getContext('2d');
+    
+            if (myLineChart) {
+                myLineChart.destroy();
+            }
+    
+            myLineChart = new Chart(lineCtx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Pengeluaran',
+                        data: data,
+                        fill: true,
+                        borderColor: '#4ade80',
+                        backgroundColor: 'rgba(74, 222, 128, 0.2)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
                     }
                 }
             });
         }
     </script>
-    
-    <script>
-        // Line Chart Config
-        const lineCtx = document.getElementById('lineChart').getContext('2d');
-        new Chart(lineCtx, {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                datasets: [{
-                    label: 'Sales',
-                    data: [30, 50, 40, 60, 70, 90],
-                    fill: true,
-                    borderColor: '#4ade80',
-                    backgroundColor: 'rgba(74, 222, 128, 0.2)',
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                }
-            }
-        });
-    </script>
+      
 </div>

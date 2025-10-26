@@ -7,6 +7,8 @@ use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
+use function PHPUnit\Framework\isEmpty;
+
 class Index extends Component
 {
     public $categories;
@@ -21,11 +23,18 @@ class Index extends Component
 
     public $expenseChartData;
 
+    public $expenseMonthLabels;
+
+    public $expenseMonthData;
+
     public $filterCategory = '';
+    public $filterPieMonthYear;
 
     public function mount()
     {
         $this->categories = Category::all();
+        $this->filterPieMonthYear = $this->filterPieMonthYear ?? now()->format('Y-m');
+
         $this->cashflows = Cashflow::with('category')
             ->where('user_id', Auth::user()->id)
             ->when($this->filterCategory, function ($query) {
@@ -34,18 +43,67 @@ class Index extends Component
             ->orderByDesc('transaction_date')
             ->get();
 
-        $this->income = $this->cashflows->where('category.type_id', 1)->sum('amount');
+        $this->income = $this->cashflows->where('category_id', 1)->sum('amount');
         $this->expenses = $this->cashflows->where('category.type_id', 2)->sum('amount');
 
-        $expenseByCategory = $this->cashflows
-            ->where('category.type_id', 2) // hanya pengeluaran
-            ->groupBy('category.name') // berdasarkan nama kategori
-            ->map(function ($items) {
-                return $items->sum('amount');
-            });
+        // Chart Pie Expense by Category
+        [$year, $month] = explode('-', $this->filterPieMonthYear);
 
-        $this->expenseChartLabels = $expenseByCategory->keys();     // ['Makanan', 'Barang', ...]
-        $this->expenseChartData = $expenseByCategory->values();     // [1000000, 800000, ...]
+        $expenseByCategory = Cashflow::with('category')
+            ->where('user_id', Auth::user()->id)
+            ->whereMonth('transaction_date', $month)
+            ->whereYear('transaction_date', $year)
+            ->whereHas('category', fn($q) => $q->where('type_id', 2))
+            ->get()
+            ->groupBy('category.name')
+            ->map(fn($items) => $items->sum('amount'));
+
+        $this->expenseChartLabels = $expenseByCategory->keys();
+        $this->expenseChartData = $expenseByCategory->values();
+
+        // Chart Line Expense by Month
+        $expenseByMonth = Cashflow::where('user_id', Auth::user()->id)
+        ->whereHas('category', fn($q) => $q->where('type_id', 2)) // hanya pengeluaran
+        ->selectRaw('DATE_FORMAT(transaction_date, "%Y-%m") as ym, SUM(amount) as total')
+        ->groupBy('ym')
+        ->orderBy('ym')
+        ->get();
+
+        $this->expenseMonthLabels = $expenseByMonth->map(function ($item) {
+            return \Carbon\Carbon::createFromFormat('Y-m', $item->ym)->translatedFormat('M Y');
+        });
+
+        $this->expenseMonthData = $expenseByMonth->pluck('total');
+    }
+
+    public function updatedFilterPieMonthYear()
+    {
+        // Jalankan ulang logika agar data terupdate
+        [$year, $month] = explode('-', $this->filterPieMonthYear);
+
+        $expenseByCategory = Cashflow::with('category')
+            ->where('user_id', Auth::user()->id)
+            ->whereMonth('transaction_date', $month)
+            ->whereYear('transaction_date', $year)
+            ->whereHas('category', fn($q) => $q->where('type_id', 2))
+            ->get()
+            ->groupBy('category.name')
+            ->map(fn($items) => $items->sum('amount'));
+
+        $this->expenseChartLabels = $expenseByCategory->keys();
+        $this->expenseChartData = $expenseByCategory->values();
+
+        if (!empty($this->expenseChartLabels) && !empty($this->expenseChartData)) {
+            $this->dispatch('update-doughnut-chart', [
+                'labels' => $this->expenseChartLabels,
+                'data' => $this->expenseChartData,
+            ]);
+        } else {
+            $this->dispatch('update-doughnut-chart', [
+                'labels' => [],
+                'data' => [],
+            ]);
+        }
     }
 
     public function updatedFilterCategory()
