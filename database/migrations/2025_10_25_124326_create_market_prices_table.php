@@ -11,18 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('investments', function (Blueprint $table) {
+        Schema::create('market_prices', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->index(); // Wajib isi
-            $table->unsignedBigInteger('investment_code_id')->nullable()->index();
-            $table->string('name')->nullable()->index();
-            $table->decimal('average_buying_price', 20, 2)->nullable()->index();
+            $table->unsignedBigInteger('investment_code_id')->index(); // Wajib isi
             $table->decimal('current_price', 20, 2)->nullable()->index();
-            $table->decimal('amount', 20, 4)->nullable()->index();
-            $table->string('broker')->nullable()->index();
+            $table->timestamp('last_update')->nullable()->index();
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('investment_code_id')->references('id')->on('investment_codes')->nullOnDelete();
         });
     }
@@ -32,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('investments');
+        Schema::dropIfExists('market_prices');
     }
 };

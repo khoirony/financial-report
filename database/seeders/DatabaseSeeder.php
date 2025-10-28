@@ -125,11 +125,14 @@ class DatabaseSeeder extends Seeder
             InvestmentCategory::create(['id' => $id, 'name' => $name]);
         }
 
+        $incomeType = Investe::create(['name' => 'Income']);
+        $spendingType = CashflowType::create(['name' => 'Spending']);
+
         // ===== INVESTMENT DUMMY =====
         $investments = [
             [
                 'user_id' => $rony->id,
-                'investment_category_id' => InvestmentCategory::STOCK,
+                'investment_code_id' => InvestmentCategory::STOCK,
                 'name' => 'BBCA (Bank Central Asia)',
                 'average_buying_price' => 9000,
                 'current_price' => 10200,
@@ -138,7 +141,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'user_id' => $rony->id,
-                'investment_category_id' => InvestmentCategory::REKSADANA,
+                'investment_code_id' => InvestmentCategory::REKSADANA,
                 'name' => 'Reksadana Pasar Uang Mandiri',
                 'average_buying_price' => 1000000,
                 'current_price' => 1050000,
@@ -147,7 +150,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'user_id' => $rony->id,
-                'investment_category_id' => InvestmentCategory::INDEX,
+                'investment_code_id' => InvestmentCategory::INDEX,
                 'name' => 'S&P 500 Index Fund',
                 'average_buying_price' => 5000000,
                 'current_price' => 5300000,
@@ -156,7 +159,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'user_id' => $rony->id,
-                'investment_category_id' => InvestmentCategory::CRYPTO,
+                'investment_code_id' => InvestmentCategory::CRYPTO,
                 'name' => 'Bitcoin (BTC)',
                 'average_buying_price' => 700000000,
                 'current_price' => 950000000,
@@ -165,7 +168,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'user_id' => $rony->id,
-                'investment_category_id' => InvestmentCategory::GOLD,
+                'investment_code_id' => InvestmentCategory::GOLD,
                 'name' => 'Emas Antam 10gr',
                 'average_buying_price' => 10000000,
                 'current_price' => 11500000,

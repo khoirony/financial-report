@@ -34,8 +34,13 @@
                 </x-sidebar.item>
             </li>
             <li class="list-none">
-                <x-sidebar.item title="Import" menuName='{{$menuName}}' active='import' route="import">
-                    <i class="text-xl text-[#700018] fas fa-file-import"></i>
+                <x-sidebar.item title="Import Cashflow" menuName='{{$menuName}}' active='import' route="import">
+                    <i class="text-xl text-[#700018] fas fa-upload"></i>
+                </x-sidebar.item>
+            </li>
+            <li class="list-none">
+                <x-sidebar.item title="Investment" menuName='{{$menuName}}' active='investment' route="investment">
+                    <i class="text-xl text-[#700018] fas fa-money-bill-trend-up"></i>
                 </x-sidebar.item>
             </li>
             {{-- @dump(auth()->user()->role_id == App\Models\Role::ADMIN) --}}

@@ -11,16 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('file_imports', function (Blueprint $table) {
+        Schema::create('investment_codes', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->index();
-            $table->string('filename')->index();
-            $table->integer('size')->index();
-            $table->string('path')->index();
+            $table->unsignedBigInteger('investment_category_id')->nullable()->index();
+            $table->string('investment_code')->nullable()->index();
             $table->timestamps();
-            $table->softDeletes();
 
-            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('investment_category_id')->references('id')->on('investment_categories')->nullOnDelete();
         });
     }
 
@@ -29,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('file_imports');
+        Schema::dropIfExists('investment_codes');
     }
 };

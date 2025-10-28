@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CashflowController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\InvestmentController;
 use App\Livewire\Portal;
 use App\Livewire\TestAlert;
 use Illuminate\Http\Request;
@@ -36,6 +37,7 @@ Route::middleware('auth')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('cashflow', [CashflowController::class, 'index'])->name('cashflow');
     Route::get('import', [CashflowController::class, 'import'])->name('import');
+    Route::get('investment', [InvestmentController::class, 'index'])->name('investment');
 
     Route::get('/test-alert', function () {
         return app(TestAlert::class);
