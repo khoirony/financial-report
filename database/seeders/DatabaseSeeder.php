@@ -7,6 +7,8 @@ use App\Models\CashflowCategory;
 use App\Models\CashflowType;
 use App\Models\Investment;
 use App\Models\InvestmentCategory;
+use App\Models\InvestmentCode;
+use App\Models\MarketPrice;
 use App\Models\User;
 use App\Models\UserRole;
 use Illuminate\Database\Seeder;
@@ -121,59 +123,116 @@ class DatabaseSeeder extends Seeder
             InvestmentCategory::GOLD => 'Gold',
         ];
 
+        $categoryModels = [];
         foreach ($categories as $id => $name) {
-            InvestmentCategory::create(['id' => $id, 'name' => $name]);
+            // Simpan model yang dibuat untuk referensi nanti
+            $categoryModels[$name] = InvestmentCategory::create(['id' => $id, 'name' => $name]);
         }
 
-        $incomeType = Investe::create(['name' => 'Income']);
-        $spendingType = CashflowType::create(['name' => 'Spending']);
+        // ===== INVESTMENT CODE =====
+        // (Membuat data untuk tabel investment_codes)
+        $codeBbca = InvestmentCode::create([
+            'investment_category_id' => $categoryModels['Stock']->id,
+            'investment_code' => 'BBCA'
+        ]);
+        $codeRdpu = InvestmentCode::create([
+            'investment_category_id' => $categoryModels['Reksadana']->id,
+            'investment_code' => 'RD-MANDIRI-PU'
+        ]);
+        $codeSp500 = InvestmentCode::create([
+            'investment_category_id' => $categoryModels['Index']->id,
+            'investment_code' => 'SPX500'
+        ]);
+        $codeBtc = InvestmentCode::create([
+            'investment_category_id' => $categoryModels['Crypto']->id,
+            'investment_code' => 'BTC'
+        ]);
+        $codeAntam = InvestmentCode::create([
+            'investment_category_id' => $categoryModels['Gold']->id,
+            'investment_code' => 'ANTAM-10G'
+        ]);
+
+        // ===== MARKET PRICE =====
+        // (Membuat data untuk tabel market_prices)
+        MarketPrice::create([
+            'investment_code_id' => $codeBbca->id,
+            'current_price' => 10200,
+            'last_update' => now()
+        ]);
+        MarketPrice::create([
+            'investment_code_id' => $codeRdpu->id,
+            'current_price' => 1050000,
+            'last_update' => now()
+        ]);
+        MarketPrice::create([
+            'investment_code_id' => $codeSp500->id,
+            'current_price' => 5300000,
+            'last_update' => now()
+        ]);
+        MarketPrice::create([
+            'investment_code_id' => $codeBtc->id,
+            'current_price' => 950000000,
+            'last_update' => now()
+        ]);
+        MarketPrice::create([
+            'investment_code_id' => $codeAntam->id,
+            'current_price' => 11500000,
+            'last_update' => now()
+        ]);
+
 
         // ===== INVESTMENT DUMMY =====
+        // (Sekarang menunjuk ke investment_code_id yang benar)
         $investments = [
             [
                 'user_id' => $rony->id,
-                'investment_code_id' => InvestmentCategory::STOCK,
+                'investment_code_id' => $codeBbca->id, // <-- DIPERBAIKI
                 'name' => 'BBCA (Bank Central Asia)',
                 'average_buying_price' => 9000,
-                'current_price' => 10200,
+                'current_price' => 10200, // Snapshot harga saat ini (sesuai market price)
                 'amount' => 100, // jumlah lembar saham
                 'broker' => 'IndoPremier',
+                'created_at' => now(), 'updated_at' => now(),
             ],
             [
                 'user_id' => $rony->id,
-                'investment_code_id' => InvestmentCategory::REKSADANA,
+                'investment_code_id' => $codeRdpu->id, // <-- DIPERBAIKI
                 'name' => 'Reksadana Pasar Uang Mandiri',
                 'average_buying_price' => 1000000,
                 'current_price' => 1050000,
                 'amount' => 10, // unit reksadana
                 'broker' => 'Bibit',
+                'created_at' => now(), 'updated_at' => now(),
             ],
             [
                 'user_id' => $rony->id,
-                'investment_code_id' => InvestmentCategory::INDEX,
+                'investment_code_id' => $codeSp500->id, // <-- DIPERBAIKI
                 'name' => 'S&P 500 Index Fund',
                 'average_buying_price' => 5000000,
                 'current_price' => 5300000,
                 'amount' => 5, // unit index fund
                 'broker' => 'Bareksa',
+                'created_at' => now(), 'updated_at' => now(),
             ],
             [
                 'user_id' => $rony->id,
-                'investment_code_id' => InvestmentCategory::CRYPTO,
+                'investment_code_id' => $codeBtc->id, // <-- DIPERBAIKI
                 'name' => 'Bitcoin (BTC)',
                 'average_buying_price' => 700000000,
                 'current_price' => 950000000,
                 'amount' => 0.001, // BTC
                 'broker' => 'Binance',
+                'created_at' => now(), 'updated_at' => now(),
             ],
             [
                 'user_id' => $rony->id,
-                'investment_code_id' => InvestmentCategory::GOLD,
+                'investment_code_id' => $codeAntam->id, // <-- DIPERBAIKI
                 'name' => 'Emas Antam 10gr',
                 'average_buying_price' => 10000000,
                 'current_price' => 11500000,
                 'amount' => 10, // gram
                 'broker' => 'Pegadaian Digital',
+                'created_at' => now(), 'updated_at' => now(),
             ],
         ];
 

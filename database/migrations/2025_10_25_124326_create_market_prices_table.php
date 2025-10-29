@@ -18,7 +18,7 @@ return new class extends Migration
             $table->timestamp('last_update')->nullable()->index();
             $table->timestamps();
 
-            $table->foreign('investment_code_id')->references('id')->on('investment_codes')->nullOnDelete();
+            $table->foreign('investment_code_id')->references('id')->on('investment_codes')->cascadeOnDelete();
         });
     }
 

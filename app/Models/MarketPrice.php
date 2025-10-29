@@ -5,13 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class InvestmentCode extends Model
+class MarketPrice extends Model
 {
     use HasFactory;
 
-    protected $table = 'investment_codes';
+    protected $table = 'market_prices';
 
     protected $fillable = [
-        'name',
+        'investment_code_id',
+        'current_price',
+        'last_update',
     ];
 }
