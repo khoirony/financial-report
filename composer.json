@@ -18,6 +18,7 @@
         "livewire/livewire": "^3.6",
         "smalot/pdfparser": "^2.12",
         "spatie/pdf-to-text": "^1.54",
+        "symfony/dom-crawler": "^7.3",
         "thiagoalessio/tesseract_ocr": "^2.13"
     },
     "require-dev": {

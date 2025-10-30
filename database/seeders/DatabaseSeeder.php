@@ -133,23 +133,38 @@ class DatabaseSeeder extends Seeder
         // (Membuat data untuk tabel investment_codes)
         $codeBbca = InvestmentCode::create([
             'investment_category_id' => $categoryModels['Stock']->id,
-            'investment_code' => 'BBCA'
+            'name' => 'Bank BCA',
+            'investment_code' => 'BBCA:IDX',
+            'source' => 'google_scrape',
+            'currency' => 'idr'
         ]);
-        $codeRdpu = InvestmentCode::create([
+        $codeBbri = InvestmentCode::create([
             'investment_category_id' => $categoryModels['Reksadana']->id,
-            'investment_code' => 'RD-MANDIRI-PU'
+            'name' => 'Bank BRI',
+            'investment_code' => 'BBRI:IDX',
+            'source' => 'google_scrape',
+            'currency' => 'idr'
         ]);
         $codeSp500 = InvestmentCode::create([
             'investment_category_id' => $categoryModels['Index']->id,
-            'investment_code' => 'SPX500'
+            'name' => 'S&P 500 Index Fund',
+            'investment_code' => 'SPY:NYSEARCA',
+            'source' => 'google_scrape',
+            'currency' => 'usd'
         ]);
         $codeBtc = InvestmentCode::create([
             'investment_category_id' => $categoryModels['Crypto']->id,
-            'investment_code' => 'BTC'
+            'name' => 'Bitcoin',
+            'investment_code' => 'bitcoin',
+            'source' => 'coingecko',
+            'currency' => 'idr'
         ]);
         $codeAntam = InvestmentCode::create([
             'investment_category_id' => $categoryModels['Gold']->id,
-            'investment_code' => 'ANTAM-10G'
+            'name' => 'Emas Global',
+            'investment_code' => 'XAU',
+            'source' => 'apised',
+            'currency' => 'idr'
         ]);
 
         // ===== MARKET PRICE =====
@@ -160,8 +175,8 @@ class DatabaseSeeder extends Seeder
             'last_update' => now()
         ]);
         MarketPrice::create([
-            'investment_code_id' => $codeRdpu->id,
-            'current_price' => 1050000,
+            'investment_code_id' => $codeBbri->id,
+            'current_price' => 7000,
             'last_update' => now()
         ]);
         MarketPrice::create([
@@ -187,19 +202,15 @@ class DatabaseSeeder extends Seeder
             [
                 'user_id' => $rony->id,
                 'investment_code_id' => $codeBbca->id, // <-- DIPERBAIKI
-                'name' => 'BBCA (Bank Central Asia)',
                 'average_buying_price' => 9000,
-                'current_price' => 10200, // Snapshot harga saat ini (sesuai market price)
                 'amount' => 100, // jumlah lembar saham
                 'broker' => 'IndoPremier',
                 'created_at' => now(), 'updated_at' => now(),
             ],
             [
                 'user_id' => $rony->id,
-                'investment_code_id' => $codeRdpu->id, // <-- DIPERBAIKI
-                'name' => 'Reksadana Pasar Uang Mandiri',
-                'average_buying_price' => 1000000,
-                'current_price' => 1050000,
+                'investment_code_id' => $codeBbri->id, // <-- DIPERBAIKI
+                'average_buying_price' => 5000,
                 'amount' => 10, // unit reksadana
                 'broker' => 'Bibit',
                 'created_at' => now(), 'updated_at' => now(),
@@ -207,19 +218,15 @@ class DatabaseSeeder extends Seeder
             [
                 'user_id' => $rony->id,
                 'investment_code_id' => $codeSp500->id, // <-- DIPERBAIKI
-                'name' => 'S&P 500 Index Fund',
                 'average_buying_price' => 5000000,
-                'current_price' => 5300000,
                 'amount' => 5, // unit index fund
                 'broker' => 'Bareksa',
                 'created_at' => now(), 'updated_at' => now(),
             ],
             [
                 'user_id' => $rony->id,
-                'investment_code_id' => $codeBtc->id, // <-- DIPERBAIKI
-                'name' => 'Bitcoin (BTC)',
+                'investment_code_id' => $codeBtc->id, // <-- DIPERBAIKI\
                 'average_buying_price' => 700000000,
-                'current_price' => 950000000,
                 'amount' => 0.001, // BTC
                 'broker' => 'Binance',
                 'created_at' => now(), 'updated_at' => now(),
@@ -227,9 +234,7 @@ class DatabaseSeeder extends Seeder
             [
                 'user_id' => $rony->id,
                 'investment_code_id' => $codeAntam->id, // <-- DIPERBAIKI
-                'name' => 'Emas Antam 10gr',
                 'average_buying_price' => 10000000,
-                'current_price' => 11500000,
                 'amount' => 10, // gram
                 'broker' => 'Pegadaian Digital',
                 'created_at' => now(), 'updated_at' => now(),

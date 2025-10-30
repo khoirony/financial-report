@@ -12,6 +12,10 @@ class InvestmentCode extends Model
     protected $table = 'investment_codes';
 
     protected $fillable = [
+        'investment_category_id',
         'name',
+        'investment_code',
+        'source',
+        'currency',
     ];
 }

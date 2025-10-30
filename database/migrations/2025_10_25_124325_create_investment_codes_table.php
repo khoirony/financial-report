@@ -14,7 +14,10 @@ return new class extends Migration
         Schema::create('investment_codes', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('investment_category_id')->nullable()->index();
+            $table->string('name')->nullable()->index();
             $table->string('investment_code')->nullable()->index();
+            $table->string('source')->nullable()->index();
+            $table->string('currency')->nullable()->index();
             $table->timestamps();
 
             $table->foreign('investment_category_id')->references('id')->on('investment_categories')->nullOnDelete();

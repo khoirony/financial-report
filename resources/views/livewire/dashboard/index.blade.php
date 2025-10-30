@@ -14,8 +14,12 @@
                 <div class="flex items-center justify-between">
                     <p class="text-3xl font-semibold text-gray-900">Rp {{ number_format($income, 0, ',', '.') }},-</p>
                     <div class="text-xl flex items-center gap-3">
-                        <i class="fas fa-arrow-trend-up"></i>
-                        <p>2.5%</p>
+                        @if ($incomeChange < 0)
+                            <i class="fas fa-arrow-trend-down"></i>
+                        @else
+                            <i class="fas fa-arrow-trend-up"></i>
+                        @endif
+                        <p>{{ $incomeChange }}%</p>
                     </div>
                 </div>
             </div>
@@ -29,8 +33,12 @@
                 <div class="flex items-center justify-between">
                     <p class="text-3xl font-semibold text-gray-900">Rp {{ number_format($expenses, 0, ',', '.') }},-</p>
                     <div class="text-xl flex items-center gap-3">
-                        <i class="fas fa-arrow-trend-down"></i>
-                        <p>5%</p>
+                        @if ($expenseChange < 0)
+                            <i class="fas fa-arrow-trend-down"></i>
+                        @else
+                            <i class="fas fa-arrow-trend-up"></i>
+                        @endif
+                        <p>{{ $expenseChange }}%</p>
                     </div>
                 </div>
             </div>
@@ -39,13 +47,17 @@
             <div class="rounded-lg p-6 border border-bright-gray text-quick-silver space-y-5">
                 <div class="flex items-center gap-5">
                     <i class="text-xl fas fa-piggy-bank"></i>
-                    <p class="text-lg font-medium">Net Savings</p>
+                    <p class="text-lg font-medium">Total Equity</p>
                 </div>
                 <div class="flex items-center justify-between">
-                    <p class="text-3xl font-semibold text-gray-900">Rp 15.0000.0000,-</p>
+                    <p class="text-3xl font-semibold text-gray-900">Rp {{ number_format($investmenentCurrentPriceTotal, 0, ',', '.') }},-</p>
                     <div class="text-xl flex items-center gap-3">
-                        <i class="fas fa-arrow-trend-up"></i>
-                        <p>25%</p>
+                        @if ($investmentChange < 0)
+                            <i class="fas fa-arrow-trend-down"></i>
+                        @else
+                            <i class="fas fa-arrow-trend-up"></i>
+                        @endif
+                        <p>{{ $investmentChange }}%</p>
                     </div>
                 </div>
             </div>
@@ -55,10 +67,10 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <!-- Expenses Breakdown -->
             <div class="bg-white rounded-lg border border-bright-gray p-6">
-                <div class="flex justify-between items-center mb-4">
+                <div class="flex justify-between items-start mb-4">
                     <h2 class="text-lg font-semibold text-gray-900">Expenses Breakdown</h2>
                     <div class="mb-4">
-                        <select id="filterPieMonthYear" wire:model.live="filterPieMonthYear" class="border rounded p-2">
+                        <select id="filterPieMonthYear" wire:model.live="filterPieMonthYear" class="border border-gray-300 rounded-lg px-3 py-2 w-auto">
                             @foreach(range(0, 11) as $i)
                                 @php
                                     $date = now()->subMonths($i);
@@ -70,6 +82,7 @@
                         </select>
                     </div>
                 </div>
+
                 <div class="h-64" wire:ignore x-init="renderDoughnutChart(@json($expenseChartLabels), @json($expenseChartData))">
                     <canvas id="doughnutChart"></canvas>
                 </div>

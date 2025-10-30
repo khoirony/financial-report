@@ -14,9 +14,7 @@ class Investment extends Model
     protected $fillable = [
         'user_id',
         'investment_code_id',
-        'name',
         'average_buying_price',
-        'current_price',
         'amount',
         'broker',
     ];
