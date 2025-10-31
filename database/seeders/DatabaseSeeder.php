@@ -136,51 +136,120 @@ class DatabaseSeeder extends Seeder
             'name' => 'Bank BCA',
             'investment_code' => 'BBCA:IDX',
             'source' => 'google_scrape',
-            'currency' => 'idr'
+            'currency' => 'idr',
+            'unit' => 'lot'
         ]);
         $codeBbri = InvestmentCode::create([
-            'investment_category_id' => $categoryModels['Reksadana']->id,
+            'investment_category_id' => $categoryModels['Stock']->id,
             'name' => 'Bank BRI',
             'investment_code' => 'BBRI:IDX',
             'source' => 'google_scrape',
-            'currency' => 'idr'
+            'currency' => 'idr',
+            'unit' => 'lot'
         ]);
-        $codeSp500 = InvestmentCode::create([
+        $codeBmri = InvestmentCode::create([
+            'investment_category_id' => $categoryModels['Stock']->id,
+            'name' => 'Bank Mandiri',
+            'investment_code' => 'BMRI:IDX',
+            'source' => 'google_scrape',
+            'currency' => 'idr',
+            'unit' => 'lot'
+        ]);
+        $codeBbni = InvestmentCode::create([
+            'investment_category_id' => $categoryModels['Stock']->id,
+            'name' => 'Bank BNI',
+            'investment_code' => 'BBNI:IDX',
+            'source' => 'google_scrape',
+            'currency' => 'idr',
+            'unit' => 'lot'
+        ]);
+        $codeArto = InvestmentCode::create([
+            'investment_category_id' => $categoryModels['Stock']->id,
+            'name' => 'Bank Jago',
+            'investment_code' => 'ARTO:IDX',
+            'source' => 'google_scrape',
+            'currency' => 'idr',
+            'unit' => 'lot'
+        ]);
+        $codeBbyb = InvestmentCode::create([
+            'investment_category_id' => $categoryModels['Stock']->id,
+            'name' => 'Bank Neo Commerce',
+            'investment_code' => 'BBYB:IDX',
+            'source' => 'google_scrape',
+            'currency' => 'idr',
+            'unit' => 'lot'
+        ]);
+        $codeBjtm = InvestmentCode::create([
+            'investment_category_id' => $categoryModels['Stock']->id,
+            'name' => 'Bank Jatim',
+            'investment_code' => 'BJTM:IDX',
+            'source' => 'google_scrape',
+            'currency' => 'idr',
+            'unit' => 'lot'
+        ]);
+        $codeGoto = InvestmentCode::create([
+            'investment_category_id' => $categoryModels['Stock']->id,
+            'name' => 'GoTo Gojek Tokopedia',
+            'investment_code' => 'GOTO:IDX',
+            'source' => 'google_scrape',
+            'currency' => 'idr',
+            'unit' => 'lot'
+        ]);
+        $codeSpy = InvestmentCode::create([
             'investment_category_id' => $categoryModels['Index']->id,
             'name' => 'S&P 500 Index Fund',
             'investment_code' => 'SPY:NYSEARCA',
             'source' => 'google_scrape',
-            'currency' => 'usd'
+            'currency' => 'usd',
+            'unit' => 'share'
+        ]);
+        $codeQqq = InvestmentCode::create([
+            'investment_category_id' => $categoryModels['Index']->id,
+            'name' => 'Nasdaq 100 Index Fund',
+            'investment_code' => 'QQQ:NASDAQ',
+            'source' => 'google_scrape',
+            'currency' => 'usd',
+            'unit' => 'share'
         ]);
         $codeBtc = InvestmentCode::create([
             'investment_category_id' => $categoryModels['Crypto']->id,
             'name' => 'Bitcoin',
             'investment_code' => 'bitcoin',
             'source' => 'coingecko',
-            'currency' => 'idr'
+            'currency' => 'idr',
+            'unit' => 'btc'
+        ]);
+        $codeEth = InvestmentCode::create([
+            'investment_category_id' => $categoryModels['Crypto']->id,
+            'name' => 'Ethereum',
+            'investment_code' => 'ethereum',
+            'source' => 'coingecko',
+            'currency' => 'idr',
+            'unit' => 'eth'
         ]);
         $codeAntam = InvestmentCode::create([
             'investment_category_id' => $categoryModels['Gold']->id,
             'name' => 'Emas Global',
             'investment_code' => 'XAU',
             'source' => 'apised',
-            'currency' => 'idr'
+            'currency' => 'idr',
+            'unit' => 'gram'
         ]);
 
         // ===== MARKET PRICE =====
         // (Membuat data untuk tabel market_prices)
         MarketPrice::create([
             'investment_code_id' => $codeBbca->id,
-            'current_price' => 10200,
+            'current_price' => 9000,
             'last_update' => now()
         ]);
         MarketPrice::create([
             'investment_code_id' => $codeBbri->id,
-            'current_price' => 7000,
+            'current_price' => 4000,
             'last_update' => now()
         ]);
         MarketPrice::create([
-            'investment_code_id' => $codeSp500->id,
+            'investment_code_id' => $codeSpy->id,
             'current_price' => 5300000,
             'last_update' => now()
         ]);
@@ -203,7 +272,7 @@ class DatabaseSeeder extends Seeder
                 'user_id' => $rony->id,
                 'investment_code_id' => $codeBbca->id, // <-- DIPERBAIKI
                 'average_buying_price' => 9000,
-                'amount' => 100, // jumlah lembar saham
+                'amount' => 10, // jumlah lembar saham
                 'broker' => 'IndoPremier',
                 'created_at' => now(), 'updated_at' => now(),
             ],
@@ -217,7 +286,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'user_id' => $rony->id,
-                'investment_code_id' => $codeSp500->id, // <-- DIPERBAIKI
+                'investment_code_id' => $codeSpy->id, // <-- DIPERBAIKI
                 'average_buying_price' => 5000000,
                 'amount' => 5, // unit index fund
                 'broker' => 'Bareksa',
@@ -235,7 +304,7 @@ class DatabaseSeeder extends Seeder
                 'user_id' => $rony->id,
                 'investment_code_id' => $codeAntam->id, // <-- DIPERBAIKI
                 'average_buying_price' => 10000000,
-                'amount' => 10, // gram
+                'amount' => 1, // gram
                 'broker' => 'Pegadaian Digital',
                 'created_at' => now(), 'updated_at' => now(),
             ],

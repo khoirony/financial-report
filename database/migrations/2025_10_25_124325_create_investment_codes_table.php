@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('investment_code')->nullable()->index();
             $table->string('source')->nullable()->index();
             $table->string('currency')->nullable()->index();
+            $table->string('unit')->nullable()->index();
             $table->timestamps();
 
             $table->foreign('investment_category_id')->references('id')->on('investment_categories')->nullOnDelete();

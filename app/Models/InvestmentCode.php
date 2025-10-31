@@ -17,6 +17,7 @@ class InvestmentCode extends Model
         'investment_code',
         'source',
         'currency',
+        'unit',
     ];
 
     public function category()

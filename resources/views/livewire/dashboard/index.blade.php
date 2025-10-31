@@ -47,7 +47,7 @@
             <div class="rounded-lg p-6 border border-bright-gray text-quick-silver space-y-5">
                 <div class="flex items-center gap-5">
                     <i class="text-xl fas fa-piggy-bank"></i>
-                    <p class="text-lg font-medium">Total Equity</p>
+                    <p class="text-lg font-medium">Total Investment</p>
                 </div>
                 <div class="flex items-center justify-between">
                     <p class="text-3xl font-semibold text-gray-900">Rp {{ number_format($investmenentCurrentPriceTotal, 0, ',', '.') }},-</p>
@@ -63,7 +63,7 @@
             </div>
         </div>
 
-        <!-- Charts Section -->
+        <!-- Expenses Charts Section -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <!-- Expenses Breakdown -->
             <div class="bg-white rounded-lg border border-bright-gray p-6">
@@ -90,9 +90,27 @@
 
             <!-- Monthly Trend -->
             <div class="bg-white rounded-lg border border-bright-gray p-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Monthly Trend</h2>
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Expenses Monthly Trend</h2>
                 <div class="h-64" wire:ignore x-init="renderLineChart(@json($expenseMonthLabels), @json($expenseMonthData))">
                     <canvas id="lineChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        {{-- Investment Chart Section --}}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white rounded-lg border border-bright-gray p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Initial Capital vs. Current Value</h2>
+                <div class="h-64" wire:ignore 
+                     x-init="$nextTick(() => renderGroupedBarChart(@json($assetLabels_grouped), @json($assetBalances_grouped), @json($assetCurrentValues_grouped)))">
+                    <canvas id="groupedBarChart"></canvas>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg border border-bright-gray p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Portfolio Allocation</h2>
+                <div class="h-64" wire:ignore 
+                     x-init="$nextTick(() => renderAllocationChart(@json($allocationLabels), @json($allocationData)))">
+                    <canvas id="allocationChart"></canvas>
                 </div>
             </div>
         </div>
@@ -208,11 +226,16 @@
     <script>
         let myDoughnutChart;
         let myLineChart;
+        let myAllocationChart;      // <-- INI YANG HILANG
+        let myGroupedBarChart;
     
         document.addEventListener('livewire:navigated', () => {
             // Render chart saat halaman pertama kali dimuat
             renderDoughnutChart(@json($expenseChartLabels), @json($expenseChartData));
             renderLineChart(@json($expenseMonthLabels), @json($expenseMonthData));
+
+            renderAllocationChart(@json($allocationLabels), @json($allocationData));
+            renderGroupedBarChart(@json($assetLabels_grouped), @json($assetBalances_grouped), @json($assetCurrentValues_grouped));
         });
     
         // 🔥 Event listener dari Livewire v3
@@ -278,6 +301,119 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function renderAllocationChart(labels, data) {
+            const allocationCtx = document.getElementById('allocationChart').getContext('2d');
+            
+            if (myAllocationChart) {
+                myAllocationChart.destroy();
+            }
+
+            myAllocationChart = new Chart(allocationCtx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: [
+                            '#4F46E5', '#10B981', '#F59E0B', '#EF4444', 
+                            '#3B82F6', '#6366F1', '#EC4899', '#8B5CF6' 
+                        ],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    let value = context.raw || 0;
+                                    let formattedValue = new Intl.NumberFormat('id-ID', {
+                                        style: 'currency',
+                                        currency: 'IDR',
+                                        minimumFractionDigits: 0,
+                                    }).format(value);
+                                    
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    return label + formattedValue;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Fungsi untuk Modal vs Current Value (BARU)
+        function renderGroupedBarChart(labels, dataBalance, dataCurrent) {
+            const barCtx = document.getElementById('groupedBarChart').getContext('2d');
+            
+            if (myGroupedBarChart) {
+                myGroupedBarChart.destroy();
+            }
+
+            myGroupedBarChart = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Total Initial Investment',
+                            data: dataBalance,
+                            backgroundColor: '#9CA3AF', // Abu-abu
+                            order: 1
+                        },
+                        {
+                            label: 'Total Current Value Investment',
+                            data: dataCurrent,
+                            backgroundColor: '#10B981', // Hijau
+                            order: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    let value = context.raw || 0;
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    return label + new Intl.NumberFormat('id-ID', {
+                                        style: 'currency',
+                                        currency: 'IDR',
+                                        minimumFractionDigits: 0
+                                    }).format(value);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return new Intl.NumberFormat('id-ID', {
+                                        notation: 'compact'
+                                    }).format(value);
+                                }
+                            }
+                        }
                     }
                 }
             });

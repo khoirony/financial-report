@@ -25,7 +25,9 @@
                             <x-table.head>Investment Name</x-table.head>
                             <x-table.head>Category</x-table.head>
                             <x-table.head>Amount</x-table.head>
+                            <x-table.head>Unit</x-table.head>
                             <x-table.head>Avg. Buying Price</x-table.head>
+                            <x-table.head>Current Price</x-table.head>
                             <x-table.head>Investment Balance</x-table.head>
                             <x-table.head>Current Value</x-table.head>
                             <x-table.head :centered="'true'">Actions</x-table.head>
@@ -35,67 +37,89 @@
                         @forelse ($investments as $id => $investment)
                             <x-table.row>
                                 <x-table.data>
-                                    <input type="text" wire:model.lazy="investments.{{ $id }}.investment_code.name" class="rounded border-none ring-0 text-sm font-light">
+                                    <select wire:model.lazy="investments.{{ $id }}.investment_code.id" class="rounded-full border-none ring-0 text-sm font-light">
+                                        @foreach ($investmentCodes as $code)
+                                            <option value="{{ $code->id }}">{{ $code->name }}</option>
+                                        @endforeach
+                                    </select>
                                 </x-table.data>
-                                <x-table.data>
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                        <select wire:model.lazy="investments.{{ $id }}.investment_code.category.id" class="rounded-full border-none ring-0 text-sm font-light bg-blue-100 text-blue-800">
-                                            @foreach ($categories as $category)
-                                                <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                            @endforeach
-                                        </select>
+                                <x-table.data class="text-center">
+                                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        {{ $investment['investment_code']['category']['name'] }}
                                     </span>
                                 </x-table.data>
                                 <x-table.data>
                                     <input type="text"
                                         wire:model.blur="investments.{{ $id }}.amount"
-                                        class="rounded border-none ring-0 text-sm font-light"
+                                        class="rounded border-none ring-0 text-sm font-light w-20"
                                         step="any"
                                         x-data="{
                                             cleanValue(val) {
                                                 if (!val && val !== 0) return '';
-                                                
-                                                // 1. Ganti koma (,) jadi titik (.) agar bisa di-parse JS
+
                                                 let valueAsDot = val.toString().replace(',', '.');
-                                                
-                                                // 2. Parse sebagai angka (ini akan menghapus nol di belakang)
-                                                //    '5.0000' -> 5
-                                                //    '0.0010' -> 0.001
                                                 let num = parseFloat(valueAsDot);
                                                 
-                                                // 3. Jika hasilnya bukan angka (NaN), kembalikan string kosong
                                                 if (isNaN(num)) return '';
                                                 
-                                                // 4. Ubah angka yang sudah bersih kembali ke string
                                                 let cleanString = num.toString();
                                                 
-                                                // 5. Kembalikan titik (.) ke koma (,) untuk tampilan di input
                                                 return cleanString.replace('.', ',');
                                             }
                                         }"
                                         x-init="$el.value = cleanValue($wire.get('investments.{{ $id }}.amount'))"
                                         @blur="$el.value = cleanValue($el.value)"
                                     >
-                                    @if($investment['investment_code']['investment_category_id'] == App\Models\InvestmentCategory::STOCK)
-                                    lot
-                                    @endif
+                                </x-table.data>
+                                <x-table.data class="text-center">
+                                    {{ $investment['investment_code']['unit'] }}
+                                </x-table.data>
+                                <x-table.data>
+                                    <input
+                                        type="text"
+                                        x-data="{ average_buying_price: '{{ number_format($investment['average_buying_price'], 0, ',', '.') }}' }"
+                                        x-init="
+                                            format();
+                                            function format() {
+                                                average_buying_price = 'Rp ' + new Intl.NumberFormat('id-ID').format(average_buying_price.replace(/[^\d]/g, ''));
+                                            }
+                                            $el.value = average_buying_price;
+                                            $el.addEventListener('input', (e) => {
+                                                average_buying_price = e.target.value;
+                                                format();
+                                                $el.value = average_buying_price;
+                                            });
+                                        "
+                                        x-on:blur="$wire.set('investments.{{ $id }}.average_buying_price', average_buying_price.replace(/[^\d]/g, ''))"
+                                        class="rounded border-none ring-0 text-sm font-light"
+                                    />
                                 </x-table.data>
                                 <x-table.data>
                                     <input type="number" 
-                                        wire:model="investments.{{ $id }}.average_buying_price" 
+                                        wire:model="investments.{{ $id }}.latest_market_price.current_price" 
                                         step="any"
                                         class="rounded border-none ring-0 text-sm font-light"
                                     >
                                 </x-table.data>
                                 <x-table.data>
                                     @php
-                                        if($investment['investment_code']['investment_category_id'] == App\Models\InvestmentCategory::STOCK) {
+                                        if($investment['investment_code']['unit'] == 'lot') {
                                             $buyingPrice = $investment['average_buying_price']*100;
                                         } else {
                                             $buyingPrice = $investment['average_buying_price'];
                                         }
                                     @endphp
                                     <p>Rp {{ number_format($buyingPrice*$investment['amount'], 2, ',', '.') }},-</p>
+                                </x-table.data>
+                                <x-table.data>
+                                    @php
+                                        if($investment['investment_code']['unit'] == 'lot') {
+                                            $currentPrice = $investment['latest_market_price']['current_price']*100;
+                                        } else {
+                                            $currentPrice = $investment['latest_market_price']['current_price'];
+                                        }
+                                    @endphp
+                                    <p>Rp {{ number_format($currentPrice*$investment['amount'], 2, ',', '.') }},-</p>
                                 </x-table.data>
                                 <x-table.data class="text-center">
                                     <button wire:click="delete({{ $investment['id'] }})" style="cursor: pointer;" class="text-red-600 hover:text-red-900">

@@ -6,6 +6,7 @@ use App\Models\Cashflow;
 use App\Models\CashflowCategory;
 use App\Models\Investment;
 use App\Models\InvestmentCategory;
+use App\Models\InvestmentCode;
 use Illuminate\Support\Facades\Auth;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Livewire\Component;
@@ -20,11 +21,14 @@ class Index extends Component
 
     public $categories;
 
+    public $investmentCodes;
+
     public $filterCategory = '';
 
     public function mount()
     {
         $this->categories = InvestmentCategory::all();
+        $this->investmentCodes = InvestmentCode::all();
     }
 
     public function formatAmount($id)
@@ -76,7 +80,7 @@ class Index extends Component
 
     public function render()
     {
-        $this->investments = Investment::with('investmentCode.category')->where('user_id', Auth::user()->id)
+        $this->investments = Investment::with(['investmentCode.category','latestMarketPrice'])->where('user_id', Auth::user()->id)
             ->when($this->filterCategory, function ($query) {
                 $query->where('investment_code_id.investment_category_id', $this->filterCategory);
             })
