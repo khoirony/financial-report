@@ -76,12 +76,10 @@ class Index extends Component
 
     public function render()
     {
-        $this->investments = Investment::with('category')
-            ->where('user_id', Auth::user()->id)
+        $this->investments = Investment::with('investmentCode.category')->where('user_id', Auth::user()->id)
             ->when($this->filterCategory, function ($query) {
-                $query->where('investment_category_id', $this->filterCategory);
+                $query->where('investment_code_id.investment_category_id', $this->filterCategory);
             })
-            ->orderByDesc('name')
             ->get()->keyBy('id')->toArray();
 
         return view('livewire.investment.index');

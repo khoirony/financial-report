@@ -19,8 +19,32 @@ class Investment extends Model
         'broker',
     ];
 
-    public function category()
+    public function investmentCode()
     {
-        return $this->belongsTo(CashflowCategory::class, 'cashflow_category_id');
+        return $this->belongsTo(investmentCode::class, 'investment_code_id');
+    }
+
+    public function marketPrice()
+    {
+        return $this->hasOneThrough(
+            MarketPrice::class,           // Model tujuan
+            InvestmentCode::class,        // Model perantara
+            'id',                         // Foreign key di InvestmentCode
+            'investment_code_id',         // Foreign key di MarketPrice
+            'investment_code_id',         // Foreign key di Investment
+            'id'                          // Local key di InvestmentCode
+        );
+    }
+
+    public function latestMarketPrice()
+    {
+        return $this->hasOneThrough(
+            MarketPrice::class,
+            InvestmentCode::class,
+            'id',                   // InvestmentCode.id
+            'investment_code_id',   // MarketPrice.investment_code_id
+            'investment_code_id',   // Investment.investment_code_id
+            'id'                    // InvestmentCode.id
+        )->latest('created_at');
     }
 }

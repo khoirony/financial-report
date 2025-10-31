@@ -18,4 +18,9 @@ class InvestmentCode extends Model
         'source',
         'currency',
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(InvestmentCategory::class, 'investment_category_id');
+    }
 }

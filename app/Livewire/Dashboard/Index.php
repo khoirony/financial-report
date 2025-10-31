@@ -115,7 +115,9 @@ class Index extends Component
 
         // Investments
         $this->investments = Investment::where('user_id', Auth::user()->id)->get();
-        $this->investmenentCurrentPriceTotal = $this->investments->sum(fn($inv) => $inv->current_price * $inv->amount);
+        $this->investmenentCurrentPriceTotal = $this->investments->sum(
+            fn($inv) => ($inv->latestMarketPrice->current_price ?? 0) * $inv->amount
+        );
         $this->investmenentBuyingPriceTotal = $this->investments->sum(fn($inv) => $inv->average_buying_price * $inv->amount);
 
         // Hitung persentase perubahan

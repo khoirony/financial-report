@@ -25,6 +25,7 @@
                             <x-table.head>Investment Name</x-table.head>
                             <x-table.head>Category</x-table.head>
                             <x-table.head>Amount</x-table.head>
+                            <x-table.head>Avg. Buying Price</x-table.head>
                             <x-table.head>Investment Balance</x-table.head>
                             <x-table.head>Current Value</x-table.head>
                             <x-table.head :centered="'true'">Actions</x-table.head>
@@ -34,11 +35,11 @@
                         @forelse ($investments as $id => $investment)
                             <x-table.row>
                                 <x-table.data>
-                                    <input type="text" wire:model.lazy="investments.{{ $id }}.name" class="rounded border-none ring-0 text-sm font-light">
+                                    <input type="text" wire:model.lazy="investments.{{ $id }}.investment_code.name" class="rounded border-none ring-0 text-sm font-light">
                                 </x-table.data>
                                 <x-table.data>
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                        <select wire:model.lazy="investments.{{ $id }}.investment_category_id" class="rounded-full border-none ring-0 text-sm font-light bg-blue-100 text-blue-800">
+                                        <select wire:model.lazy="investments.{{ $id }}.investment_code.category.id" class="rounded-full border-none ring-0 text-sm font-light bg-blue-100 text-blue-800">
                                             @foreach ($categories as $category)
                                                 <option value="{{ $category->id }}">{{ $category->name }}</option>
                                             @endforeach
@@ -75,13 +76,26 @@
                                         x-init="$el.value = cleanValue($wire.get('investments.{{ $id }}.amount'))"
                                         @blur="$el.value = cleanValue($el.value)"
                                     >
+                                    @if($investment['investment_code']['investment_category_id'] == App\Models\InvestmentCategory::STOCK)
+                                    lot
+                                    @endif
                                 </x-table.data>
                                 <x-table.data>
                                     <input type="number" 
-                                        wire:model="investments.{{ $id }}.amount" 
+                                        wire:model="investments.{{ $id }}.average_buying_price" 
                                         step="any"
                                         class="rounded border-none ring-0 text-sm font-light"
                                     >
+                                </x-table.data>
+                                <x-table.data>
+                                    @php
+                                        if($investment['investment_code']['investment_category_id'] == App\Models\InvestmentCategory::STOCK) {
+                                            $buyingPrice = $investment['average_buying_price']*100;
+                                        } else {
+                                            $buyingPrice = $investment['average_buying_price'];
+                                        }
+                                    @endphp
+                                    <p>Rp {{ number_format($buyingPrice*$investment['amount'], 2, ',', '.') }},-</p>
                                 </x-table.data>
                                 <x-table.data class="text-center">
                                     <button wire:click="delete({{ $investment['id'] }})" style="cursor: pointer;" class="text-red-600 hover:text-red-900">
