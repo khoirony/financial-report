@@ -28,6 +28,7 @@
                             <x-table.head>Unit</x-table.head>
                             <x-table.head>Avg. Buying Price</x-table.head>
                             <x-table.head>Current Price</x-table.head>
+                            <x-table.head>P&L</x-table.head>
                             <x-table.head>Investment Balance</x-table.head>
                             <x-table.head>Current Value</x-table.head>
                             <x-table.head :centered="'true'">Actions</x-table.head>
@@ -35,17 +36,18 @@
                     </x-table.header>
                     <x-table.body>
                         @forelse ($investments as $id => $investment)
-                            <x-table.row>
+                            <x-table.row wire:key="investment-{{ $id }}">
                                 <x-table.data>
-                                    <select wire:model.lazy="investments.{{ $id }}.investment_code.id" class="rounded-full border-none ring-0 text-sm font-light">
+                                    <select wire:model.lazy="investments.{{ $id }}.investment_code_id" class="rounded-full border-none ring-0 text-sm font-light">
+                                        <option value="">Select Investment</option>
                                         @foreach ($investmentCodes as $code)
                                             <option value="{{ $code->id }}">{{ $code->name }}</option>
                                         @endforeach
                                     </select>
                                 </x-table.data>
                                 <x-table.data class="text-center">
-                                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                                        {{ $investment['investment_code']['category']['name'] }}
+                                    <span class="px-3 py-1 text-xs font-semibold rounded-full {{ $this->getCategoryColor($investment['investment_code']['investment_category_id'] ?? null) }}">
+                                        {{ $investment['investment_code']['category']['name'] ?? '' }}
                                     </span>
                                 </x-table.data>
                                 <x-table.data>
@@ -56,14 +58,10 @@
                                         x-data="{
                                             cleanValue(val) {
                                                 if (!val && val !== 0) return '';
-
                                                 let valueAsDot = val.toString().replace(',', '.');
                                                 let num = parseFloat(valueAsDot);
-                                                
                                                 if (isNaN(num)) return '';
-                                                
                                                 let cleanString = num.toString();
-                                                
                                                 return cleanString.replace('.', ',');
                                             }
                                         }"
@@ -72,54 +70,97 @@
                                     >
                                 </x-table.data>
                                 <x-table.data class="text-center">
-                                    {{ $investment['investment_code']['unit'] }}
+                                    {{ $investment['investment_code']['unit'] ?? '' }}
                                 </x-table.data>
                                 <x-table.data>
                                     <input
                                         type="text"
-                                        x-data="{ average_buying_price: '{{ number_format($investment['average_buying_price'], 0, ',', '.') }}' }"
-                                        x-init="
-                                            format();
-                                            function format() {
-                                                average_buying_price = 'Rp ' + new Intl.NumberFormat('id-ID').format(average_buying_price.replace(/[^\d]/g, ''));
+                                        wire:model.defer="investments.{{ $id }}.average_buying_price"
+
+                                        x-data="{
+                                            parse(val) {
+                                                if (!val) return null;
+                                                let clean = val.toString()
+                                                    .replace(/Rp\s/g, '')  // Hapus 'Rp '
+                                                    .replace(/\./g, '')    // Hapus titik ribuan
+                                                    .replace(/,/g, '.');   // Ubah koma desimal jadi titik
+                                                
+                                                let num = parseFloat(clean);
+                                                return isNaN(num) ? null : num;
+                                            },
+
+                                            format(val) {
+                                                let num = parseFloat(val); 
+                                                if (isNaN(num)) return '';
+
+                                                let formatted = new Intl.NumberFormat('id-ID', {
+                                                    minimumFractionDigits: 0, 
+                                                    maximumFractionDigits: 5 // Izinkan hingga 5 angka desimal
+                                                }).format(num);
+                                                
+                                                return 'Rp ' + formatted;
+                                            },
+
+                                            formatForInput(val) {
+                                                let num = parseFloat(val);
+                                                if (isNaN(num)) return '';
+                                                
+                                                return num.toString().replace('.', ','); 
                                             }
-                                            $el.value = average_buying_price;
-                                            $el.addEventListener('input', (e) => {
-                                                average_buying_price = e.target.value;
-                                                format();
-                                                $el.value = average_buying_price;
-                                            });
+                                        }"
+
+                                        x-init="$el.value = format($wire.get('investments.{{ $id }}.average_buying_price'))"
+                                        
+                                        @focus="$el.value = formatForInput($wire.get('investments.{{ $id }}.average_buying_price'))"
+                                        
+                                        @blur="
+                                            let numericValue = parse($el.value);
+                                            $wire.set('investments.{{ $id }}.average_buying_price', numericValue);
+                                            $el.value = format(numericValue);
                                         "
-                                        x-on:blur="$wire.set('investments.{{ $id }}.average_buying_price', average_buying_price.replace(/[^\d]/g, ''))"
+                                        
                                         class="rounded border-none ring-0 text-sm font-light"
                                     />
                                 </x-table.data>
                                 <x-table.data>
-                                    <input type="number" 
-                                        wire:model="investments.{{ $id }}.latest_market_price.current_price" 
-                                        step="any"
-                                        class="rounded border-none ring-0 text-sm font-light"
-                                    >
+                                    <p>Rp {{ number_format($investment['latest_market_price']['current_price'] ?? 0, 2, ',', '.') }},-</p>
                                 </x-table.data>
                                 <x-table.data>
                                     @php
-                                        if($investment['investment_code']['unit'] == 'lot') {
-                                            $buyingPrice = $investment['average_buying_price']*100;
-                                        } else {
-                                            $buyingPrice = $investment['average_buying_price'];
-                                        }
+                                        $percentageChange = $this->getPnL(
+                                            $investment['average_buying_price'] ?? 0, 
+                                            $investment['latest_market_price']['current_price'] ?? 0,
+                                            $investment['investment_code']['unit'] ?? 0, 
+                                            $investment['amount'] ?? 0
+                                        );
                                     @endphp
-                                    <p>Rp {{ number_format($buyingPrice*$investment['amount'], 2, ',', '.') }},-</p>
+                                    <p class="{{ $percentageChange < 0 ? 'text-red-500' : 'text-green-700' }} font-semibold">
+                                        {{ $percentageChange }}%
+                                    </p>
                                 </x-table.data>
                                 <x-table.data>
                                     @php
-                                        if($investment['investment_code']['unit'] == 'lot') {
-                                            $currentPrice = $investment['latest_market_price']['current_price']*100;
-                                        } else {
-                                            $currentPrice = $investment['latest_market_price']['current_price'];
-                                        }
+                                        $buyingPrice = $this->getTotalValue(
+                                            $investment['average_buying_price'] ?? 0, 
+                                            $investment['investment_code']['unit'] ?? 0,
+                                            $investment['amount'] ?? 0
+                                        );
                                     @endphp
-                                    <p>Rp {{ number_format($currentPrice*$investment['amount'], 2, ',', '.') }},-</p>
+                                    <p class="font-semibold">
+                                        Rp {{ number_format($buyingPrice, 2, ',', '.') }},-
+                                    </p>
+                                </x-table.data>
+                                <x-table.data>
+                                    @php
+                                        $buyingPrice = $this->getTotalValue(
+                                            $investment['latest_market_price']['current_price'] ?? 0, 
+                                            $investment['investment_code']['unit'] ?? 0,
+                                            $investment['amount'] ?? 0
+                                        );
+                                    @endphp
+                                    <p class="font-semibold">
+                                        Rp {{ number_format($buyingPrice, 2, ',', '.') }},-
+                                    </p>
                                 </x-table.data>
                                 <x-table.data class="text-center">
                                     <button wire:click="delete({{ $investment['id'] }})" style="cursor: pointer;" class="text-red-600 hover:text-red-900">
@@ -129,7 +170,7 @@
                             </x-table.row>
                         @empty
                             <x-table.row>
-                                <x-table.data colspan="5">
+                                <x-table.data colspan="10">
                                     <div class="text-center">No Data Found</div>
                                 </x-table.data>
                             </x-table.row>

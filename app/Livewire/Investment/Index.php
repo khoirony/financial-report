@@ -57,7 +57,15 @@ class Index extends Component
         $id = $this->investments[$index]['id'] ?? null;
 
         if ($field === 'amount') {
-            $value = preg_replace('/[^\d]/', '', $value);
+            $cleaned_value = str_replace('.', '', $value); 
+        
+            $cleaned_value = str_replace(',', '.', $cleaned_value);
+
+            if (is_numeric($cleaned_value)) {
+                $value = $cleaned_value;
+            } else {
+                $value = 0; 
+            }
         }
 
         Investment::where('id', $id)->update([
@@ -69,22 +77,65 @@ class Index extends Component
     {
         $newInvestment = Investment::create([
             'user_id' => Auth::user()->id,
-            'cashflow_category_id' => 1,
-            'description' => '',
+            'investment_code_id' => null,
+            'average_buying_price' => 0,
             'amount' => 0,
-            'transaction_date' => now(),
+            'broker' => '',
         ]);
 
         $this->investments[] = $newInvestment->toArray();
     }
 
+    public function getPnL($buyingPrice, $currentPrice, $unit, $amount)
+    {
+        $buyingTotalValue = $this->getPrice($buyingPrice, $unit)*$amount;
+        $currentTotalValue = $this->getPrice($currentPrice, $unit)*$amount;
+
+        return $buyingTotalValue > 0 ? round((($currentTotalValue - $buyingTotalValue) / $buyingTotalValue) * 100, 1) : 0; 
+    }
+
+    public function getTotalValue($price, $unit, $amount)
+    {
+        return $this->getPrice($price, $unit)*$amount;
+    }
+
+    public function getPrice($price, $unit)
+    {
+        if($unit == 'lot') {
+            return $price*100;
+        } else {
+            return $price;
+        }
+    }
+
+    public function getCategoryColor($categoryId)
+    {
+        if($categoryId == InvestmentCategory::STOCK) {
+            return 'bg-green-100 text-green-800';
+        }elseif($categoryId == InvestmentCategory::INDEX) {
+            return 'bg-blue-100 text-blue-800';
+        }elseif($categoryId == InvestmentCategory::CRYPTO) {
+            return 'bg-orange-100 text-orange-800';
+        }elseif($categoryId == InvestmentCategory::GOLD) {
+            return 'bg-yellow-100 text-yellow-800';
+        } else {
+            return 'bg-gray-100 text-gray-800';
+        }
+    }
+
     public function render()
     {
-        $this->investments = Investment::with(['investmentCode.category','latestMarketPrice'])->where('user_id', Auth::user()->id)
+        $this->investments = Investment::with(['investmentCode.category', 'latestMarketPrice'])
+            ->leftJoin('investment_codes', 'investment_codes.id', '=', 'investments.investment_code_id')
+            ->where('investments.user_id', Auth::user()->id) 
             ->when($this->filterCategory, function ($query) {
-                $query->where('investment_code_id.investment_category_id', $this->filterCategory);
+                $query->where('investment_codes.investment_category_id', $this->filterCategory);
             })
-            ->get()->keyBy('id')->toArray();
+            ->orderBy('investment_codes.investment_category_id')
+            ->select('investments.*') 
+            ->get()
+            ->keyBy('id')
+            ->toArray();
 
         return view('livewire.investment.index');
     }
