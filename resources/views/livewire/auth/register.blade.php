@@ -32,21 +32,21 @@
             <div>
                 <label class="text-sm text-slate-600 font-medium">Email</label>
                 <input wire:model="email" type="email" placeholder="email@example.com"
-                    class="mt-1 w-full px-4 py-2 border border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-400 bg-white/50 placeholder:text-gray-400 placeholder:text-sm">
+                    class="mt-1 w-full px-4 py-3 border border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-400 bg-white/50 placeholder:text-gray-400 placeholder:text-sm">
                 @error('email') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
 
             <div>
                 <label class="text-sm text-slate-600 font-medium">Password</label>
                 <input wire:model="password" type="password" placeholder="Type your password here.."
-                    class="mt-1 w-full px-4 py-2 border border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-400 bg-white/50 placeholder:text-gray-400 placeholder:text-sm">
+                    class="mt-1 w-full px-4 py-3 border border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-400 bg-white/50 placeholder:text-gray-400 placeholder:text-sm">
                 @error('password') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
 
             <div>
                 <label class="text-sm text-slate-600 font-medium">Confirm Password</label>
                 <input wire:model="password_confirmation" type="password" placeholder="Type again your password here.."
-                    class="mt-1 w-full px-4 py-2 border border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-400 bg-white/50 placeholder:text-gray-400 placeholder:text-sm">
+                    class="mt-1 w-full px-4 py-3 border border-emerald-200 rounded-xl focus:ring-2 focus:ring-emerald-400 bg-white/50 placeholder:text-gray-400 placeholder:text-sm">
             </div>
 
             <button

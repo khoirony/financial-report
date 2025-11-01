@@ -56,7 +56,7 @@
             <div>
                 <label class="text-sm text-slate-600 font-medium">Password</label>
                 <input wire:model="password" type="password"
-                    class="mt-1 w-full px-4 py-2 border border-emerald-200 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:outline-none transition-all duration-300 bg-white/50">
+                    class="mt-1 w-full px-4 py-3 border border-emerald-200 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:outline-none transition-all duration-300 bg-white/50">
                 @error('password') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
 
