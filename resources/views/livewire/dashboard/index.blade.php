@@ -170,7 +170,7 @@
         <!-- Transactions Table -->
         <div class="bg-white rounded-lg border border-bright-gray overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                <h2 class="text-lg font-semibold text-gray-900">Latest Transactions</h2>
+                <h2 class="text-lg font-semibold text-gray-900">Latest Month Transactions</h2>
                 <div class="relative">
                     <select wire:model.lazy="filterCategory" class="block appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
                         <option value="">All Transactions</option>
@@ -185,9 +185,11 @@
                     <thead class="bg-gray-50">
                         <tr>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">From</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">To</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -195,9 +197,6 @@
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     <p class="text-sm font-light">{{ $cashflow->transaction_date }}</p>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    <p class="text-sm font-light">{{ $cashflow->description }}</p>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $cashflow->type_id === 1 ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800' }}">
@@ -207,10 +206,19 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-medium">
                                     <p class="text-sm font-light">Rp {{ number_format($cashflow->amount, 0, ',', '.') }},-</p>
                                 </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    <p class="text-sm font-light">{{ $cashflow->description }}</p>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    <p class="text-sm font-light">{{ $cashflow->source_account }}</p>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    <p class="text-sm font-light">{{ $cashflow->destination_account }}</p>
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="flex items-center justify-center py-5">
+                                <td colspan="6" class="flex items-center justify-center py-5">
                                     <div>No Data Found</div>
                                 </td>
                             </tr>
