@@ -21,7 +21,7 @@ class Investment extends Model
 
     public function investmentCode()
     {
-        return $this->belongsTo(investmentCode::class, 'investment_code_id');
+        return $this->belongsTo(InvestmentCode::class, 'investment_code_id');
     }
 
     public function marketPrice()
