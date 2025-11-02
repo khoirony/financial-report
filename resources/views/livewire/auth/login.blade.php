@@ -61,7 +61,7 @@
             </div>
 
             <div class="flex justify-between text-sm items-center">
-                <a href="#" class="text-emerald-600 hover:text-emerald-800 transition">Forgot your password?</a>
+                <a href="{{ route('password.request') }}" class="text-emerald-600 hover:text-emerald-800 transition">Forgot your password?</a>
             </div>
 
             <button 

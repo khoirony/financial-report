@@ -1,15 +1,8 @@
 <div 
     x-data="{ show: false }" 
     x-init="setTimeout(() => show = true, 200)" 
-    class="relative min-h-screen flex items-center justify-center overflow-hidden"
+    class="relative min-h-screen flex items-center justify-center overflow-hidden w-full"
 >
-
-    <!-- Background Floating Shapes -->
-    <div class="absolute inset-0">
-        <div class="absolute -top-20 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
-        <div class="absolute bottom-10 right-20 w-96 h-96 md:bg-emerald-200/30 rounded-full blur-3xl animate-[spin_12s_linear_infinite]"></div>
-    </div>
-
     <!-- Register Card -->
     <div 
         x-show="show" 
@@ -17,15 +10,15 @@
         class="relative z-10 bg-white rounded-3xl px-8 py-12 w-full max-w-[500px] md:border"
     >
         <h2 class="text-2xl font-bold text-gray-800 mb-4">
-            Verifikasi Alamat Email Anda
+            Verify Your Email Address
         </h2>
-
-        <p class="text-gray-600 mb-6">
-            Terima kasih telah mendaftar! Sebelum melanjutkan, mohon periksa email Anda dan klik link verifikasi yang telah kami kirimkan.
+        
+        <p class="text-gray-600 mb-12">
+            Thanks for signing up! Before you continue, please check your email and click the verification link we sent you.
         </p>
-
+        
         <p class="text-gray-600 mb-6">
-            Jika Anda tidak menerima email, kami dapat mengirimkannya kembali.
+            Didn’t get the email? No worries — we can send it again.
         </p>
 
         <!-- Menampilkan pesan sukses jika email berhasil dikirim ulang -->
@@ -40,7 +33,7 @@
             <form method="POST" action="{{ route('verification.send') }}">
                 @csrf
                 <button type"submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                    Kirim Ulang Email Verifikasi
+                    Resend Verification Email
                 </button>
             </form>
 

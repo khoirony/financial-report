@@ -4,7 +4,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CashflowController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InvestmentController;
-use App\Livewire\Auth\VerifyEmail; // Pastikan 'use' ini ada
+use App\Livewire\Auth\VerifyEmail;
+use App\Livewire\Auth\ForgotPassword;
+use App\Livewire\Auth\ResetPassword;
 use App\Livewire\Portal;
 use App\Livewire\TestAlert;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -27,6 +29,10 @@ Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'register'])->name('register');
     Route::get('/login', [AuthController::class, 'login'])->name('login');
     Route::get('/portal', Portal::class)->name('portal');
+    Route::get('/forgot-password', ForgotPassword::class)
+        ->name('password.request');
+    Route::get('/reset-password/{token}', ResetPassword::class)
+        ->name('password.reset');
 });
 
 Route::middleware('auth')->group(function () {
