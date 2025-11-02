@@ -36,7 +36,7 @@ class Login extends Component
             request()->session()->regenerate();
 
             // Redirect ke halaman dashboard
-            return $this->redirect('/dashboard', navigate: true);
+            return $this->redirect('/dashboard');
         }
 
         // Jika login gagal, tambahkan error
