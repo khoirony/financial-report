@@ -23,26 +23,46 @@
 
         {{-- List item --}}
         <ul class="space-y-4 list-none">
-            <li class="list-none">
-                <x-sidebar.item title="Dashboard" menuName='{{$menuName}}' active='dashboard' route="dashboard">
-                    <i class="text-xl text-[#700018] fas fa-chart-simple"></i>
-                </x-sidebar.item>
-            </li>
-            <li class="list-none">
-                <x-sidebar.item title="Cashflow Data" menuName='{{$menuName}}' active='cashflow' route="cashflow">
-                    <i class="text-xl text-[#700018] fas fa-table"></i>
-                </x-sidebar.item>
-            </li>
-            <li class="list-none">
-                <x-sidebar.item title="Import Cashflow" menuName='{{$menuName}}' active='import' route="import">
-                    <i class="text-xl text-[#700018] fas fa-upload"></i>
-                </x-sidebar.item>
-            </li>
-            <li class="list-none">
-                <x-sidebar.item title="Investment" menuName='{{$menuName}}' active='investment' route="investment">
-                    <i class="text-xl text-[#700018] fas fa-money-bill-trend-up"></i>
-                </x-sidebar.item>
-            </li>
+            @can('is-admin')
+                <li class="list-none">
+                    <x-sidebar.item title="Dashboard" menuName='{{$menuName}}' active='dashboard-admin' route="admin.dashboard">
+                        <i class="text-xl text-[#700018] fas fa-chart-simple"></i>
+                    </x-sidebar.item>
+                </li>
+                <li class="list-none">
+                    <x-sidebar.item title="Manage Cashflow" menuName='{{$menuName}}' active='manage-cashflow' route="admin.cashflow">
+                        <i class="text-lg text-[#700018] fas fa-money-check-dollar"></i>
+                    </x-sidebar.item>
+                </li>
+                <li class="list-none">
+                    <x-sidebar.item title="Manage Investment" menuName='{{$menuName}}' active='manage-investment' route="admin.investment">
+                        <i class="text-xl text-[#700018] fas fa-money-bill-trend-up"></i>
+                    </x-sidebar.item>
+                </li>
+            @endcan
+
+            @can('is-user')
+                <li class="list-none">
+                    <x-sidebar.item title="Dashboard" menuName='{{$menuName}}' active='dashboard' route="dashboard">
+                        <i class="text-xl text-[#700018] fas fa-chart-simple"></i>
+                    </x-sidebar.item>
+                </li>
+                <li class="list-none">
+                    <x-sidebar.item title="Cashflow Data" menuName='{{$menuName}}' active='cashflow' route="cashflow">
+                        <i class="text-lg text-[#700018] fas fa-money-check dollar"></i>
+                    </x-sidebar.item>
+                </li>
+                <li class="list-none">
+                    <x-sidebar.item title="Import Cashflow" menuName='{{$menuName}}' active='import' route="import">
+                        <i class="text-xl text-[#700018] fas fa-upload"></i>
+                    </x-sidebar.item>
+                </li>
+                <li class="list-none">
+                    <x-sidebar.item title="Investment" menuName='{{$menuName}}' active='investment' route="investment">
+                        <i class="text-xl text-[#700018] fas fa-money-bill-trend-up"></i>
+                    </x-sidebar.item>
+                </li>
+            @endcan
         </ul>
     </div>
 </aside>

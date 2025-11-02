@@ -36,39 +36,42 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    // 1. Rute untuk menampilkan halaman "mohon verifikasi email"
     Route::get('/email/verify', VerifyEmail::class)
         ->name('verification.notice');
-    
-    // 2. Rute yang menangani link dari email (saat user mengklik link)
+
     Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
         $request->fulfill();
         return redirect('/dashboard');
-    })->middleware('signed')->name('verification.verify'); // 'auth' sudah ada dari grup
+    })->middleware('signed')->name('verification.verify');
     
-    // 3. Rute untuk mengirim ulang email verifikasi
     Route::post('/email/verification-notification', function (Request $request) {
         $request->user()->sendEmailVerificationNotification();
-        return back()->with('message', 'Link verifikasi baru telah dikirim!');
-    })->middleware('throttle:6,1')->name('verification.send'); // 'auth' sudah ada dari grup
+        return back()->with('message', 'New verification link has been sent!');
+    })->middleware('throttle:6,1')->name('verification.send');
 
     Route::post('/logout', function (Request $request) {
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('/'); // Redirect ke halaman login setelah logout
+        return redirect('/');
     })->name('logout');
 });
 
-
-// 3. Route yang memerlukan autentikasi DAN verifikasi email
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('cashflow', [CashflowController::class, 'index'])->name('cashflow');
-    Route::get('import', [CashflowController::class, 'import'])->name('import');
-    Route::get('investment', [InvestmentController::class, 'index'])->name('investment');
-
     Route::get('/test-alert', function () {
         return app(TestAlert::class);
+    });
+
+    Route::middleware('can:is-admin')->group(function () {
+        Route::get('dashboard-admin', [DashboardController::class, 'dashboardAdmin'])->name('admin.dashboard');
+        Route::get('manage-cashflow', [CashflowController::class, 'manageCashflow'])->name('admin.cashflow');
+        Route::get('manage-investment', [InvestmentController::class, 'manageInvestment'])->name('admin.investment');
+    });
+
+    Route::middleware('can:is-user')->group(function () {
+        Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::get('cashflow', [CashflowController::class, 'index'])->name('cashflow');
+        Route::get('import', [CashflowController::class, 'import'])->name('import');
+        Route::get('investment', [InvestmentController::class, 'index'])->name('investment');
     });
 });

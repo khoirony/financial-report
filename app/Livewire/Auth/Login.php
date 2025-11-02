@@ -35,8 +35,11 @@ class Login extends Component
             // Regenerate session untuk keamanan
             request()->session()->regenerate();
 
-            // Redirect ke halaman dashboard
-            return $this->redirect('/dashboard');
+            if(auth()->user()->can('is-admin')){
+                return redirect()->route('admin.dashboard');
+            }else{
+                return redirect()->route('dashboard');
+            }
         }
 
         // Jika login gagal, tambahkan error

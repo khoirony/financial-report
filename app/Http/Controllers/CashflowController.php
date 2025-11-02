@@ -13,4 +13,9 @@ class CashflowController extends Controller
     {
         return view('cashflow.import');
     }
+
+    public function manageCashflow()
+    {
+        return view('admin.manage-cashflow');
+    }
 }

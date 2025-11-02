@@ -8,4 +8,9 @@ class InvestmentController extends Controller
     {
         return view('investment.index');
     }
+
+    public function manageInvestment()
+    {
+        return view('admin.manage-investment');
+    }
 }
