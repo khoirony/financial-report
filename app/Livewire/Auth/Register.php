@@ -48,7 +48,7 @@ class Register extends Component
         auth()->login($user);
 
         // Redirect ke dashboard (middleware 'verified' akan menangani sisanya)
-        return $this->redirect('/dashboard', navigate: true);
+        return $this->redirect('/dashboard');
     }
 
     public function render()
