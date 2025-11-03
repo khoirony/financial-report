@@ -39,6 +39,11 @@
                         <i class="text-xl text-[#700018] fas fa-money-bill-trend-up"></i>
                     </x-sidebar.item>
                 </li>
+                <li class="list-none">
+                    <x-sidebar.item title="Manage Users" menuName='{{$menuName}}' active='manage-user' route="admin.user">
+                        <i class="text-xl text-[#700018] fas fa-users-gear"></i>
+                    </x-sidebar.item>
+                </li>
             @endcan
 
             @can('is-user')

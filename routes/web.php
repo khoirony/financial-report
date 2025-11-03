@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CashflowController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InvestmentController;
+use App\Http\Controllers\UserController;
 use App\Livewire\Auth\VerifyEmail;
 use App\Livewire\Auth\ForgotPassword;
 use App\Livewire\Auth\ResetPassword;
@@ -24,7 +25,6 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// 1. Route untuk tamu (belum login)
 Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'register'])->name('register');
     Route::get('/login', [AuthController::class, 'login'])->name('login');
@@ -66,6 +66,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('dashboard-admin', [DashboardController::class, 'dashboardAdmin'])->name('admin.dashboard');
         Route::get('manage-cashflow', [CashflowController::class, 'manageCashflow'])->name('admin.cashflow');
         Route::get('manage-investment', [InvestmentController::class, 'manageInvestment'])->name('admin.investment');
+        Route::get('manage-user', [UserController::class, 'manageUser'])->name('admin.user');
     });
 
     Route::middleware('can:is-user')->group(function () {
