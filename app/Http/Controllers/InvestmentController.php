@@ -13,4 +13,14 @@ class InvestmentController extends Controller
     {
         return view('admin.manage-investment');
     }
+
+    public function fireCalculator()
+    {
+        return view('investment.fire-calculator');
+    }
+
+    public function analysis()
+    {
+        return view('investment.analysis');
+    }
 }

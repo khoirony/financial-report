@@ -1,7 +1,7 @@
 <div>
     <main class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="mb-10">
-            <h1 class="text-3xl font-semibold">Manage Users</h1>
+            <h1 class="text-xl md:text-3xl font-semibold">Manage Users</h1>
         </div>
 
         <div class="bg-white rounded-lg border border-bright-gray overflow-hidden mb-10">

@@ -1,8 +1,8 @@
 <div>
     <main class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div class="mb-10 flex justify-between">
-            <h1 class="text-3xl font-semibold">Manage Investment</h1>
-            <button wire:click="addNewInvestment" class="rounded-lg px-4 py-2 border border-quick-silver cursor-pointer">Add New Investment</button>
+        <div class="md:mb-10 mb-5 flex md:flex-row flex-col justify-between gap-5">
+            <h1 class="text-xl md:text-3xl font-semibold">Manage Investment</h1>
+            <button wire:click="addNewInvestment" class="rounded-lg px-4 py-2 border border-bright-gray cursor-pointer">Add New Investment</button>
         </div>
 
         <!-- Transactions Table -->
@@ -10,7 +10,7 @@
             <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                 <h2 class="text-lg font-semibold text-gray-900">All Assets</h2>
                 <div class="relative">
-                    <select wire:model.lazy="filterCategory" class="block appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                    <select wire:model.lazy="filterCategory" class="border border-bright-gray text-gray-700 py-2 px-4 pr-8 rounded-lg text-sm">
                         <option value="">All Assets</option>
                         @foreach ($categories as $category)
                             <option value="{{ $category->id }}">{{ $category->name }}</option>

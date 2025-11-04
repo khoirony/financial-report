@@ -1,7 +1,7 @@
 <div>
     <main class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="mb-10">
-            <h1 class="text-3xl font-semibold">Dashboard</h1>
+            <h1 class="text-xl md:text-3xl font-semibold">Dashboard</h1>
         </div>
         <!-- Summary Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -9,11 +9,11 @@
             <div class="rounded-lg p-6 border border-bright-gray text-quick-silver space-y-5">
                 <div class="flex items-center gap-5">
                     <i class="text-xl fas fa-sack-dollar"></i>
-                    <p class="text-lg font-medium">Total Income</p>
+                    <p class="text-sm xl:text-lg font-medium">Total Income</p>
                 </div>
-                <div class="flex items-center justify-between">
-                    <p class="text-3xl font-semibold text-gray-900">Rp {{ number_format($income, 0, ',', '.') }},-</p>
-                    <div class="text-xl flex items-center gap-3">
+                <div class="flex flex-row md:flex-col-reverse xl:flex-row items-between justify-between gap-5">
+                    <p class="sm:text-xl xl:text-xl 2xl:text-3xl font-semibold text-gray-900">Rp {{ number_format($income, 0, ',', '.') }},-</p>
+                    <div class="xl:text-base 2xl:text-xl flex items-center justify-end gap-3">
                         @if ($incomeChange < 0)
                             <i class="fas fa-arrow-trend-down"></i>
                         @else
@@ -28,11 +28,11 @@
             <div class="rounded-lg p-6 border border-bright-gray text-quick-silver space-y-5">
                 <div class="flex items-center gap-5">
                     <i class="text-xl fas fa-money-bill-transfer"></i>
-                    <p class="text-lg font-medium">Total Expenses</p>
+                    <p class="text-sm xl:text-lg font-medium">Total Expenses</p>
                 </div>
-                <div class="flex items-center justify-between">
-                    <p class="text-3xl font-semibold text-gray-900">Rp {{ number_format($expenses, 0, ',', '.') }},-</p>
-                    <div class="text-xl flex items-center gap-3">
+                <div class="flex flex-row md:flex-col-reverse xl:flex-row items-between justify-between gap-5">
+                    <p class="sm:text-xl xl:text-xl 2xl:text-3xl font-semibold text-gray-900">Rp {{ number_format($expenses, 0, ',', '.') }},-</p>
+                    <div class="xl:text-base 2xl:text-xl flex items-center justify-end gap-3">
                         @if ($expenseChange < 0)
                             <i class="fas fa-arrow-trend-down"></i>
                         @else
@@ -47,11 +47,11 @@
             <div class="rounded-lg p-6 border border-bright-gray text-quick-silver space-y-5">
                 <div class="flex items-center gap-5">
                     <i class="text-xl fas fa-piggy-bank"></i>
-                    <p class="text-lg font-medium">Total Investment</p>
+                    <p class="text-sm xl:text-lg font-medium">Total Investment</p>
                 </div>
-                <div class="flex items-center justify-between">
-                    <p class="text-3xl font-semibold text-gray-900">Rp {{ number_format($investmenentCurrentPriceTotal, 0, ',', '.') }},-</p>
-                    <div class="text-xl flex items-center gap-3">
+                <div class="flex flex-row md:flex-col-reverse xl:flex-row items-between justify-between gap-5">
+                    <p class="sm:text-xl xl:text-xl 2xl:text-3xl font-semibold text-gray-900">Rp {{ number_format($investmenentCurrentPriceTotal, 0, ',', '.') }},-</p>
+                    <div class="xl:text-base 2xl:text-xl flex items-center justify-end gap-3">
                         @if ($investmentChange < 0)
                             <i class="fas fa-arrow-trend-down"></i>
                         @else

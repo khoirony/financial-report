@@ -1,12 +1,12 @@
 <div>
     <main class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
         <div class="mb-10 flex justify-between">
-            <h1 class="text-3xl font-semibold">Import Data</h1>
+            <h1 class="text-xl md:text-3xl font-semibold">Import Data</h1>
         </div>
 
         <div id="FileUpload" class="relative">
             <input type="file"
-                class="absolute inset-0 z-50 m-0 p-0 w-full h-full outline-none opacity-0 cursor-pointer"
+                class="absolute inset-0 z-10 m-0 p-0 w-full h-full outline-none opacity-0 cursor-pointer"
                 x-on:dragover="$el.classList.add('active')"
                 x-on:dragleave="$el.classList.remove('active')"
                 x-on:drop="$el.classList.remove('active')"

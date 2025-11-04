@@ -1,10 +1,8 @@
 <div>
     <main class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div class="mb-10 flex justify-between">
-            <h1 class="text-3xl font-semibold">Manage Cashflow</h1>
-            <div>
-                <button wire:click="addNewCashflow" class="rounded-lg px-4 py-2 border border-quick-silver cursor-pointer">Add New Cashflow</button>
-            </div>
+        <div class="md:mb-10 mb-5 flex md:flex-row flex-col justify-between gap-5">
+            <h1 class="text-xl md:text-3xl font-semibold">Manage Cashflows</h1>
+            <button wire:click="addNewCashflow" class="rounded-lg px-4 py-2 border border-bright-gray cursor-pointer">Add New Cashflow</button>
         </div>
 
         <!-- Transactions Table -->

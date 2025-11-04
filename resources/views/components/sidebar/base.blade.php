@@ -53,7 +53,7 @@
                     </x-sidebar.item>
                 </li>
                 <li class="list-none">
-                    <x-sidebar.item title="Cashflow Data" menuName='{{$menuName}}' active='cashflow' route="cashflow">
+                    <x-sidebar.item title="Manage Cashflow" menuName='{{$menuName}}' active='cashflow' route="cashflow">
                         <i class="text-lg text-[#700018] fas fa-money-check dollar"></i>
                     </x-sidebar.item>
                 </li>
@@ -63,8 +63,18 @@
                     </x-sidebar.item>
                 </li>
                 <li class="list-none">
-                    <x-sidebar.item title="Investment" menuName='{{$menuName}}' active='investment' route="investment">
+                    <x-sidebar.item title="Manage Investment" menuName='{{$menuName}}' active='investment' route="investment">
                         <i class="text-xl text-[#700018] fas fa-money-bill-trend-up"></i>
+                    </x-sidebar.item>
+                </li>
+                <li class="list-none">
+                    <x-sidebar.item title="Fire Calculator" menuName='{{$menuName}}' active='fire-calculator' route="fire">
+                        <i class="text-xl text-[#700018] fas fa-person-walking-luggage"></i>
+                    </x-sidebar.item>
+                </li>
+                <li class="list-none">
+                    <x-sidebar.item title="Investment Analysis" menuName='{{$menuName}}' active='investment-analysis' route="analysis">
+                        <i class="text-xl text-[#700018] fas fa-chart-line"></i>
                     </x-sidebar.item>
                 </li>
             @endcan
