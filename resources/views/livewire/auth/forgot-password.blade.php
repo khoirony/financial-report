@@ -7,7 +7,7 @@
     <div 
         x-show="show" 
         x-transition.opacity.duration.700ms 
-        class="relative z-10 bg-white rounded-3xl px-8 py-12 w-full max-w-[500px] md:border"
+        class="relative z-10 bg-white rounded-3xl px-8 py-12 my-5 w-full max-w-[500px] md:border"
     >
         <div class="max-w-md w-full text-center">
             

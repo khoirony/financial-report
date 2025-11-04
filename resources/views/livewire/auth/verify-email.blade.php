@@ -7,7 +7,7 @@
     <div 
         x-show="show" 
         x-transition.opacity.duration.700ms 
-        class="relative z-10 bg-white rounded-3xl px-8 py-12 w-full max-w-[500px] md:border"
+        class="relative z-10 bg-white rounded-3xl px-8 py-12 my-5 w-full max-w-[500px] md:border"
     >
         <h2 class="text-2xl font-bold text-gray-800 mb-4">
             Verify Your Email Address

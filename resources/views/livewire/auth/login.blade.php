@@ -14,7 +14,7 @@
     <div 
         x-show="show" 
         x-transition.scale.origin.center.duration.700ms 
-        class="relative z-10 bg-white md:backdrop-blur-xl md:shadow-2xl rounded-3xl px-8 py-12 w-full max-w-[500px] md:border border-white/20"
+        class="relative z-10 bg-white md:backdrop-blur-xl md:shadow-2xl rounded-3xl px-8 py-12 my-5 w-full max-w-[500px] md:border border-white/20"
     >
         <div class="text-center mb-12">
             <div class="flex justify-center mb-3">
