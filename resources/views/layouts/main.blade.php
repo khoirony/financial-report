@@ -7,7 +7,7 @@
 
         <title>{{ config('app.name', 'Financial Report') }}</title>
 
-        <!-- Fonts -->
+        <link rel="shortcut icon" href="{{ url(asset('favicon.ico')) }}">
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])

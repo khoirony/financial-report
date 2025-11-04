@@ -11,7 +11,7 @@
         @endif
 
         <!-- Favicon -->
-		<link rel="shortcut icon" href="{{ url(asset('favicon.ico')) }}">
+        <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
 
         <!-- Fonts -->
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
