@@ -7,15 +7,46 @@
 
         <!-- Transactions Table -->
         <div class="bg-white rounded-lg border border-bright-gray overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                <h2 class="text-lg font-semibold text-gray-900">All Transactions</h2>
-                <div class="relative">
-                    <select wire:model.lazy="filterCategory" class="block appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
-                        <option value="">All Transactions</option>
-                        @foreach ($categories as $category)
-                            <option value="{{ $category->id }}">{{ $category->name }}</option>
-                        @endforeach
-                    </select>
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900 mb-3 md:mb-0">All Transactions</h2>
+                <div x-data="{ filter: false }" class="w-full">
+                    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+                        
+                        <div class="w-full">
+                            <input type="text" wire:model.live.300ms="search" placeholder="Wanna search something?" class="rounded-lg border border-gray-300 text-sm font-light w-full">
+                        </div>
+                
+                        <div class="flex flex-col md:flex-row md:items-end gap-3">
+                            
+                            <div class="md:hidden flex justify-end items-center"> 
+                                <button @click="filter = !filter" type="button" class="py-2 px-3 rounded-lg border border-gray-300 text-sm font-light w-full">
+                                    <span>Filters</span>
+                                    <i class="fa-solid ml-2" :class="filter ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                                </button>
+                            </div>
+                
+                            <div x-cloak :class="filter ? 'flex' : 'hidden md:flex'" class="flex flex-col md:flex-row items-end gap-3">
+                                <div class="w-full">
+                                    <p class="text-xs ml-3 mb-1">Start Date</p>
+                                    <input type="date" wire:model.lazy="startDate" class="rounded-lg border border-gray-300 text-sm font-light w-full md:w-auto">
+                                </div>
+                                <div class="w-full">
+                                    <p class="text-xs ml-3 mb-1">End Date</p>
+                                    <input type="date" wire:model.lazy="endDate" class="rounded-lg border border-gray-300 text-sm font-light w-full md:w-auto">
+                                </div>
+                                <div class="w-full">
+                                    <p class="text-xs ml-3 mb-1">Category</p>
+                                    <select wire:model.lazy="filterCategory" class="block appearance-none bg-white border border-gray-300 text-gray-700 py-2.5 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm w-full md:w-auto">
+                                        <option value="">All Transactions</option>
+                                        @foreach ($categories as $category)
+                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                
+                    </div>
                 </div>
             </div>
             <div class="overflow-x-auto">

@@ -16,6 +16,12 @@ class Index extends Component
 
     public $cashflows;
 
+    public $search;
+
+    public $startDate;
+
+    public $endDate;
+
     public $categories;
 
     public $filterCategory = '';
@@ -25,6 +31,8 @@ class Index extends Component
     public function mount()
     {
         $this->categories = CashflowCategory::all();
+        $this->startDate = now()->startOfMonth()->toDateString();
+        $this->endDate = now()->endOfMonth()->toDateString();
     }
 
     public function delete($id)
@@ -72,6 +80,23 @@ class Index extends Component
             ->where('user_id', Auth::user()->id)
             ->when($this->filterCategory, function ($query) {
                 $query->where('cashflow_category_id', $this->filterCategory);
+            })
+            ->when($this->search, function ($query, $search) {
+                $query->where(function ($subQuery) use ($search) {
+                    $subQuery->where('description', 'like', '%' . $search . '%')
+                        ->orWhere('amount', 'like', '%' . $search . '%')
+                        ->orWhere('source_account', 'like', '%' . $search . '%')
+                        ->orWhere('destination_account', 'like', '%' . $search . '%');
+                    $subQuery->orWhereHas('category', function ($categoryQuery) use ($search) {
+                        $categoryQuery->where('name', 'like', '%' . $search . '%');
+                    });
+                });
+            })
+            ->when($this->startDate, function ($query) {
+                $query->where('transaction_date', '>=', $this->startDate);
+            })
+            ->when($this->endDate, function ($query) {
+                $query->where('transaction_date', '<=', $this->endDate);
             })
             ->orderByDesc('transaction_date')
             ->get()->keyBy('id')->toArray();

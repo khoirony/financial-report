@@ -4,8 +4,8 @@
             <h1 class="text-xl md:text-3xl font-semibold">Fire Calculator</h1>
         </div>
 
-        <div class="w-full flex flex-col md:flex-row gap-5">
-            <div class="flex-1">
+        <div class="w-full grid grid-cols-1 xl:grid-cols-3 gap-5">
+            <div class="col-span-1">
                 <form wire:submit.prevent="calculate" 
                     class="bg-white p-6 rounded-lg border border-gray-200 space-y-4"
                     x-data="{
@@ -23,7 +23,7 @@
                         @this.set('postRetirementMonthlySavings', cleanNumber(postRetirementMonthlySavings));
                     }"
                 >
-                    <h2 class="text-xl font-semibold text-gray-800">Perkiraan Kekayaan Bersih</h2>
+                    <h2 class="text-xl font-semibold text-gray-800">Net Worth Projection</h2>
                     
                     @php
                     $inputWrapperClass = "relative";
@@ -33,7 +33,7 @@
                     @endphp
 
                     <div>
-                        <label for="currentBalance" class="block text-sm font-medium text-gray-700">Saldo Saat Ini</label>
+                        <label for="currentBalance" class="block text-sm font-medium text-gray-700">Current Total Investment</label>
                         <div class="{{ $inputWrapperClass }} mt-1">
                             <span class="{{ $symbolClass }}">Rp</span>
                             <input type="text" 
@@ -46,7 +46,7 @@
                     </div>
 
                     <div>
-                        <label for="monthlySavings" class="block text-sm font-medium text-gray-700">Tabungan Bulanan</label>
+                        <label for="monthlySavings" class="block text-sm font-medium text-gray-700">Monthly Investment</label>
                         <div class="{{ $inputWrapperClass }} mt-1">
                             <span class="{{ $symbolClass }}">Rp</span>
                             <input type="text" 
@@ -59,7 +59,7 @@
                     </div>
 
                     <div>
-                        <label for="annualBonus" class="block text-sm font-medium text-gray-700">Tabungan THR Tahunan</label>
+                        <label for="annualBonus" class="block text-sm font-medium text-gray-700">Annual Bonus / THR (optional)</label>
                         <div class="{{ $inputWrapperClass }} mt-1">
                             <span class="{{ $symbolClass }}">Rp</span>
                             <input type="text" 
@@ -72,16 +72,16 @@
                     </div>
 
                     <div>
-                        <label for="annualGrowthRate" class="block text-sm font-medium text-gray-700">Perkiraan Pertumbuhan Tahunan</label>
+                        <label for="annualGrowthRate" class="block text-sm font-medium text-gray-700">Estimated Annual Profit</label>
                         <div class="{{ $inputWrapperClass }} mt-1">
                             <input type="number" step="0.1" wire:model.defer="annualGrowthRate" id="annualGrowthRate" class="{{ $inputClass }} !pl-3">
                             <span class="{{ $percentClass }}">%</span>
                         </div>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-800">Kalkulasi Pensiun</h3>
+                    <h3 class="text-xl font-semibold text-gray-800">Retirement Calculation</h3>
                     
                     <div>
-                        <label for="monthlySpending" class="block text-sm font-medium text-gray-700">Perkiraan Pengeluaran Bulanan</label>
+                        <label for="monthlySpending" class="block text-sm font-medium text-gray-700">Estimated Monthly Spending</label>
                         <div class="{{ $inputWrapperClass }} mt-1">
                             <span class="{{ $symbolClass }}">Rp</span>
                             <input type="text" 
@@ -93,14 +93,14 @@
                         </div>
                     </div>
                     <div>
-                        <label for="retirementGrowthRate" class="block text-sm font-medium text-gray-700">Profitabilitas saat Pensiun</label>
+                        <label for="retirementGrowthRate" class="block text-sm font-medium text-gray-700">Post-Retirement Growth Rate</label>
                         <div class="{{ $inputWrapperClass }} mt-1">
                             <input type="number" step="0.1" wire:model.defer="retirementGrowthRate" id="retirementGrowthRate" class="{{ $inputClass }} !pl-3">
                             <span class="{{ $percentClass }}">%</span>
                         </div>
                     </div>
                     <div>
-                        <label for="postRetirementMonthlySavings" class="block text-sm font-medium text-gray-700">Tabungan Bulanan (Setelah Pensiun)</label>
+                        <label for="postRetirementMonthlySavings" class="block text-sm font-medium text-gray-700">Monthly Investment After Retirement (optional)</label>
                         <div class="{{ $inputWrapperClass }} mt-1">
                             <span class="{{ $symbolClass }}">Rp</span>
                             <input type="text" 
@@ -112,14 +112,14 @@
                         </div>
                     </div>
                     <div>
-                        <label for="inflationRate" class="block text-sm font-medium text-gray-700">Perkiraan Inflasi</label>
+                        <label for="inflationRate" class="block text-sm font-medium text-gray-700">Estimated Inflation</label>
                         <div class="{{ $inputWrapperClass }} mt-1">
                             <input type="number" step="0.1" wire:model.defer="inflationRate" id="inflationRate" class="{{ $inputClass }} !pl-3">
                             <span class="{{ $percentClass }}">%</span>
                         </div>
                     </div>
                     <div>
-                        <label for="currentAge" class="block text-sm font-medium text-gray-700">Usia Anda saat ini</label>
+                        <label for="currentAge" class="block text-sm font-medium text-gray-700">Your Current Age</label>
                         <div class="{{ $inputWrapperClass }} mt-1">
                             <input type="number" wire:model.defer="currentAge" id="currentAge" class="{{ $inputClass }} !pl-3">
                             <span class="{{ $percentClass }}">thn</span>
@@ -127,56 +127,56 @@
                     </div>
     
                     <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                        <span wire:loading.remove>Hitung</span>
-                        <span wire:loading>Menghitung...</span>
+                        <span wire:loading.remove>Calculate</span>
+                        <span wire:loading>Calculating...</span>
                     </button>
                 </form>
             </div>
-            <div class="flex-2 space-y-5">
+            <div class="col-span-2 space-y-5">
                 <div class="bg-white p-4 md:p-6 rounded-lg border border-gray-200">
-                    <div class="h-[500px]" wire:ignore>
+                    <div class="w-full h-[500px]" wire:ignore>
                         <canvas id="retirementChartCanvas"></canvas>
                     </div>
                 </div>
     
                 @if ($results)
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="md:col-span-1 bg-blue-600 text-white p-6 rounded-lg shadow-lg flex flex-col justify-center items-center text-center">
-                            <span class="text-sm font-light">Pensiun di</span>
-                            <span class="text-3xl md:text-4xl font-bold">usia {{ $results['retirementAge'] }}</span>
+                        <div class="md:col-span-1 bg-blue-600 text-white p-6 rounded-lg flex flex-col justify-center items-center text-center">
+                            <span class="text-sm font-light">You Will Retire at</span>
+                            <span class="text-3xl md:text-4xl font-bold">age {{ $results['retirementAge'] }}</span>
                         </div>
                         
-                        <div class="md:col-span-2 bg-white p-6 rounded-lg shadow-lg grid grid-cols-2 gap-4">
+                        <div class="md:col-span-2 bg-white p-6 rounded-lg border border-gray-200 grid grid-cols-2 gap-4">
                             <div>
-                                <span class="block text-sm text-gray-500">Saldo Saat Ini</span>
+                                <span class="block text-sm text-gray-500">Current Investment</span>
                                 <span class="block text-lg font-semibold text-gray-900">Rp{{ number_format($currentBalance, 0, ',', '.') }}</span>
                             </div>
                             <div>
-                                <span class="block text-sm text-gray-500">Tabungan Bulanan</span>
+                                <span class="block text-sm text-gray-500">Monthly Investment</span>
                                 <span class="block text-lg font-semibold text-gray-900">Rp{{ number_format($monthlySavings, 0, ',', '.') }}</span>
                             </div>
                             <div>
-                                <span class="block text-sm text-gray-500">Saldo Pensiun</span>
+                                <span class="block text-sm text-gray-500">Retirement Balance</span>
                                 <span class="block text-lg font-semibold text-gray-900">Rp{{ number_format($results['retirementBalance'], 0, ',', '.') }}</span>
                             </div>
                             <div>
-                                <span class="block text-sm text-gray-500">Tabungan Tahunan (Pra-Pensiun)</span>
+                                <span class="block text-sm text-gray-500">Annual Investment Pre Retirement</span>
                                 <span class="block text-lg font-semibold text-gray-900">Rp{{ number_format(($monthlySavings * 12) + $annualBonus, 0, ',', '.') }}</span>
                             </div>
                             <div>
-                                <span class="block text-sm text-gray-500">Pensiun pada</span>
+                                <span class="block text-sm text-gray-500">Retire On</span>
                                 <span class="block text-lg font-semibold text-gray-900">{{ $results['retirementDate'] }}</span>
                             </div>
                             <div>
-                                <span class="block text-sm text-gray-500">Perkiraan Profitabilitas</span>
+                                <span class="block text-sm text-gray-500">Annual Profitability Rate</span>
                                 <span class="block text-lg font-semibold text-gray-900">{{ $annualGrowthRate }}%</span>
                             </div>
                         </div>
                     </div>
                 @else
                     <div class="bg-white p-6 rounded-lg shadow-lg text-center">
-                        <h3 class="text-lg font-semibold text-yellow-600">Tidak Dapat Menghitung Pensiun</h3>
-                        <p class="text-gray-600 mt-2">Berdasarkan angka saat ini, Anda tidak dapat pensiun dalam 50 tahun ke depan. Coba tingkatkan tabungan Anda atau kurangi ekspektasi pengeluaran.</p>
+                        <h3 class="text-lg font-semibold text-yellow-600">Cannot Calculate Retirement</h3>
+                        <p class="text-gray-600 mt-2">Based on the current numbers, you cannot retire within the next 50 years. Try increasing your savings or reducing your spending expectations.</p>
                     </div>
                 @endif
             </div>
@@ -284,12 +284,10 @@
                     <li x-show="lang === 'en'"><strong>Chart:</strong> The chart shows the projection of your wealth over time.</li>
                     <li x-show="lang === 'id'"><strong>Chart:</strong> Chart menunjukkan proyeksi kekayaan Anda dari waktu ke waktu.</li>
                     <ul class="list-decimal list-inside ml-4 mt-1 space-y-1">
-                        <li x-show="lang === 'en'">The <strong>Blue Area</strong> is your "Total Savings," or the total money you contributed (principal).</li>
+                        <li x-show="lang === 'en'">The <strong>Blue Area</strong> is your "Total Investments," or the total money you contributed (principal).</li>
                         <li x-show="lang === 'id'"><strong>Area Biru</strong> adalah "Total Tabungan" Anda, atau jumlah total uang yang Anda masukkan (modal).</li>
-                        <li x-show="lang === 'en'">The <strong>Green Area</strong> is your "Total Returns," or the result of your investments (compounding effect).</li>
+                        <li x-show="lang === 'en'">The <strong>Green Area</strong> is your "Total Return Inventments," or the result of your investments (compounding effect).</li>
                         <li x-show="lang === 'id'"><strong>Area Hijau</strong> adalah "Total Keuntungan", atau hasil dari investasi Anda (compounding effect).</li>
-                        <li x-show="lang === 'en'">The <strong>Orange Line & Point</strong> mark the "Retirement Year," when your total wealth (blue + green) reaches the target nest egg needed to cover your expenses.</li>
-                        <li x-show="lang === 'id'"><strong>Garis & Titik Oranye</strong> menandai "Tahun Pensiun", yaitu saat total kekayaan Anda (biru + hijau) mencapai target dana pensiun yang dibutuhkan untuk menutupi pengeluaran Anda.</li>
                     </ul>
                     <li x-show="lang === 'en'"><strong>Result Cards:</strong> Show a summary of when you will retire, at what age, and with what total balance.</li>
                     <li x-show="lang === 'id'"><strong>Kartu Hasil:</strong> Menampilkan ringkasan kapan Anda akan pensiun, di usia berapa, dan dengan total saldo berapa.</li>
@@ -380,7 +378,7 @@
                     labels: labels,
                     datasets: [
                         {
-                            label: 'Total Tabungan',
+                            label: 'Total Investments',
                             data: savingsData,
                             backgroundColor: 'rgba(59, 130, 246, 0.5)',
                             borderColor: 'rgba(59, 130, 246, 1)',
@@ -389,7 +387,7 @@
                             pointRadius: 0,
                         },
                         {
-                            label: 'Total Keuntungan',
+                            label: 'Total Return Investments',
                             data: returnsData,
                             backgroundColor: 'rgba(16, 185, 129, 0.5)',
                             borderColor: 'rgba(16, 185, 129, 1)',
