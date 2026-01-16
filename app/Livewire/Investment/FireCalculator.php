@@ -6,36 +6,38 @@ use Livewire\Component;
 
 class FireCalculator extends Component
 {
-    public float $currentBalance = 65000000;
-    public float $monthlySavings = 3000000;
-    public float $annualBonus = 9000000;
-    public float $annualGrowthRate = 10;
-    public float $monthlySpending = 6000000;
-    public float $retirementGrowthRate = 10;
-    public float $postRetirementMonthlySavings = 2000000;
-    public float $inflationRate = 3;
+    // --- Properti Input ---
+    public $currentBalance = 65000000;
+    public $monthlySavings = 3000000;
+    public $annualBonus = 9000000;
+    public $monthlySpending = 6000000;
+    public $postRetirementIncome = 0; // Income tambahan saat pensiun (Barista FIRE)
+
+    public float $annualGrowthRate = 10;     // Return investasi masa muda
+    public float $retirementGrowthRate = 6;  // Return saat pensiun (lebih aman)
+    public float $inflationRate = 3;         // Inflasi tahunan
     public int $currentAge = 25;
 
     public ?array $results = null;
 
+    // --- Data Chart ---
     public array $chartData = [
         'labels' => [],
-        'savings' => [],
-        'returns' => [],
-        'retirementYear' => null,
-        'retirementBalance' => null,
+        'savings' => [],  // Uang Pokok
+        'returns' => [],  // Bunga / Growth
+        'expenses' => [], // Garis Pengeluaran (Dataset baru)
     ];
 
     protected $rules = [
-        'currentBalance' => 'required|numeric|min:0',
-        'monthlySavings' => 'required|numeric|min:0',
-        'annualBonus' => 'required|numeric|min:0',
+        'currentBalance' => 'required',
+        'monthlySavings' => 'required',
+        'annualBonus' => 'required',
+        'monthlySpending' => 'required',
+        'postRetirementIncome' => 'required',
         'annualGrowthRate' => 'required|numeric|min:0|max:100',
-        'monthlySpending' => 'required|numeric|min:0',
         'retirementGrowthRate' => 'required|numeric|min:0|max:100',
-        'postRetirementMonthlySavings' => 'required|numeric|min:0',
         'inflationRate' => 'required|numeric|min:0|max:100',
-        'currentAge' => 'required|integer|min:18|max:100',
+        'currentAge' => 'required|integer|min:18|max:90',
     ];
 
     public function mount()
@@ -43,73 +45,136 @@ class FireCalculator extends Component
         $this->calculate();
     }
 
-    // ### PERUBAHAN HANYA DI DALAM FUNGSI INI ###
+    public function updated()
+    {
+        $this->calculate();
+    }
+
     public function calculate()
     {
-        $this->validate();
+        // 1. Sanitasi Input (Hapus titik ribuan)
+        $currentBalance = (float) str_replace('.', '', $this->currentBalance);
+        $monthlySavings = (float) str_replace('.', '', $this->monthlySavings);
+        $annualBonus = (float) str_replace('.', '', $this->annualBonus);
+        $monthlySpending = (float) str_replace('.', '', $this->monthlySpending);
+        $postRetirementIncome = (float) str_replace('.', '', $this->postRetirementIncome);
 
-        $targetNestEgg = $this->calculateTargetNestEgg();
+        if ($monthlySpending <= 0) {
+            $this->results = null;
+            return;
+        }
+
+        $balance = $currentBalance;
+        $totalPrincipal = $currentBalance;
         
-        $balance = $this->currentBalance;
-        $totalSavings = $this->currentBalance;
         $retirementAge = null;
         $retirementBalance = null;
         $retirementYearLabel = null;
-        $currentYear = date('Y');
+        $currentYear = (int) date('Y');
 
         $labels = [];
         $savingsData = [];
         $returnsData = [];
-        $yearsAfterRetirement = 0;
+        $expensesData = []; // Array untuk garis merah (pengeluaran)
+        
+        $hasRetired = false;
 
-        for ($year = 0; $year <= 50; $year++) {
-            $age = $this->currentAge + $year;
+        // 2. Hitung Target Dana Pensiun
+        // Kita hanya perlu investasi untuk menutup GAP (Biaya Hidup - Gaji Pensiun)
+        $monthlyGap = max(0, $monthlySpending - $postRetirementIncome);
+        $realRetirementRate = $this->retirementGrowthRate - $this->inflationRate;
+        
+        // Rumus Perpetuity / 4% Rule yang disesuaikan
+        $initialTargetNestEgg = ($realRetirementRate > 0) 
+            ? ($monthlyGap * 12) / ($realRetirementRate / 100)
+            : ($monthlyGap * 12) * 25;
+
+        if ($monthlyGap <= 0) $initialTargetNestEgg = 0;
+
+        // 3. Loop Simulasi 60 Tahun
+        for ($year = 0; $year <= 60; $year++) {
             $yearLabel = $currentYear + $year;
+            $myAge = $this->currentAge + $year;
 
-            if ($retirementAge) {
-                $yearsAfterRetirement++;
-                if ($yearsAfterRetirement > 5) {
-                    break;
-                }
+            // Hitung nilai masa depan akibat inflasi
+            $inflationFactor = pow(1 + ($this->inflationRate / 100), $year);
+            
+            $inflatedAnnualSpending = ($monthlySpending * 12) * $inflationFactor;
+            $inflatedAnnualIncome = ($postRetirementIncome * 12) * $inflationFactor;
+            
+            // Target dana pensiun tahun ini (ikut naik kena inflasi)
+            $targetForThisYear = $initialTargetNestEgg * $inflationFactor;
 
-                $labels[] = $yearLabel;
-                $interest = $balance * ($this->retirementGrowthRate / 100);
-                $postContribution = $this->postRetirementMonthlySavings * 12;
-
-                $balance += $interest + $postContribution;
-                $totalSavings += $postContribution;
+            if (!$hasRetired) {
+                // --- FASE AKUMULASI ---
                 
-                $savingsData[] = $totalSavings;
-                $returnsData[] = $balance - $totalSavings;
-            } 
-            else {
-                $labels[] = $yearLabel;
-                $savingsData[] = $totalSavings;
-                $returnsData[] = $balance - $totalSavings;
-
-                $interest = $balance * ($this->annualGrowthRate / 100);
-                $contribution = ($this->monthlySavings * 12) + $this->annualBonus;
-
-                $balance += $interest + $contribution;
-                $totalSavings += $contribution;
-
-                $inflatedTarget = $targetNestEgg * pow(1 + ($this->inflationRate / 100), $year + 1);
-
-                if ($balance >= $inflatedTarget) {
-                    $retirementAge = $age;
+                // Cek apakah sudah pensiun?
+                if ($balance >= $targetForThisYear && $year >= 0) {
+                    $hasRetired = true;
+                    $retirementAge = $myAge;
                     $retirementBalance = $balance;
                     $retirementYearLabel = $yearLabel;
+                    
+                    $this->results = [
+                        'retirementAge' => $retirementAge,
+                        'retirementBalance' => $retirementBalance,
+                        'retirementDate' => $yearLabel,
+                        'monthlySpendingFuture' => $inflatedAnnualSpending / 12,
+                        'monthlyIncomeFuture' => $inflatedAnnualIncome / 12,
+                        'gapToCover' => max(0, ($inflatedAnnualSpending - $inflatedAnnualIncome) / 12),
+                    ];
                 }
             }
+
+            $labels[] = $yearLabel;
+            
+            if ($hasRetired) {
+                // --- FASE PENSIUN (DRAWDOWN) ---
+                
+                // Tambah Return Investasi
+                $investmentReturn = $balance * ($this->retirementGrowthRate / 100);
+                
+                // Hitung Kekurangan (Net Withdrawal)
+                $netWithdrawal = $inflatedAnnualSpending - $inflatedAnnualIncome;
+
+                if ($netWithdrawal > 0) {
+                    // Tarik dari tabungan
+                    $balance = $balance + $investmentReturn - $netWithdrawal;
+                } else {
+                    // Surplus (Gaji Pensiun > Biaya Hidup), tabung sisanya
+                    $surplus = abs($netWithdrawal);
+                    $balance = $balance + $investmentReturn + $surplus;
+                    $totalPrincipal += $surplus; 
+                }
+                
+                if ($balance < 0) $balance = 0;
+
+            } else {
+                // --- FASE INVESTASI ---
+                $investmentReturn = $balance * ($this->annualGrowthRate / 100);
+                $contribution = ($monthlySavings * 12) + $annualBonus;
+                
+                $balance += $investmentReturn + $contribution;
+                $totalPrincipal += $contribution;
+            }
+
+            // Simpan Data Chart
+            $savingsData[] = $totalPrincipal; 
+            $returnsData[] = max(0, $balance - $totalPrincipal); // Agar bisa distack
+            $expensesData[] = $inflatedAnnualSpending; // Simpan pengeluaran tahunan
         }
 
-        if ($retirementAge) {
-            $this->results = [
-                'retirementAge' => $retirementAge,
-                'retirementBalance' => $retirementBalance,
-                'retirementDate' => date('F Y', strtotime("+$retirementAge years -$this->currentAge years")),
+        // Fallback jika target tercapai instan
+        if (!$hasRetired && $initialTargetNestEgg == 0) {
+             $this->results = [
+                'retirementAge' => $this->currentAge,
+                'retirementBalance' => $currentBalance,
+                'retirementDate' => $currentYear,
+                'monthlySpendingFuture' => $monthlySpending,
+                'monthlyIncomeFuture' => $postRetirementIncome,
+                'gapToCover' => 0
             ];
-        } else {
+        } elseif (!$hasRetired) {
             $this->results = null;
         }
 
@@ -117,21 +182,10 @@ class FireCalculator extends Component
             'labels' => $labels,
             'savings' => $savingsData,
             'returns' => $returnsData,
-            'retirementYear' => $retirementYearLabel,
-            'retirementBalance' => $retirementBalance,
+            'expenses' => $expensesData, // Kirim ke view
         ];
-
-        $this->dispatch('chartUpdated', $this->chartData);
-    }
-
-    private function calculateTargetNestEgg(): float
-    {
-        $realReturnRate = $this->retirementGrowthRate - $this->inflationRate;
-        if ($realReturnRate <= 0) {
-            return 999999999999.0; 
-        }
-        $annualSpending = $this->monthlySpending * 12;
-        return $annualSpending / ($realReturnRate / 100);
+        
+        $this->dispatch('update-chart', data: $this->chartData); 
     }
 
     public function render()
