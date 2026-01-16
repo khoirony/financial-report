@@ -10,11 +10,11 @@ class CashflowCategory extends Model
     use HasFactory;
 
     public const SALARY = 1;
-    public const INVESTMENT = 2;
-    public const FOOD = 3;
-    public const GROCERIES = 4;
-    public const ITEMS = 5;
-    public const ENTERTAINMENT = 6;
+    public const FOOD = 2;
+    public const GROCERIES = 3;
+    public const ITEMS = 4;
+    public const ENTERTAINMENT = 5;
+    public const OTHERS = 6;
 
     protected $table = 'cashflow_categories';
 

@@ -2,14 +2,20 @@
 
 namespace App\Livewire\Cashflow;
 
+use App\Models\Cashflow;
+use App\Models\CashflowCategory;
 use App\Models\FileImport;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Spatie\PdfToText\Pdf;
-use thiagoalessio\TesseractOCR\TesseractOCR;
+use Illuminate\Support\Facades\Http;
+
+class GeminiQuotaException extends \Exception {}
 
 class Import extends Component
 {
@@ -26,286 +32,307 @@ class Import extends Component
 
     public function loadFile()
     {
-        $this->fileImports = FileImport::all();
+        $this->fileImports = FileImport::where('user_id', Auth::user()->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
 
     public function updatedImport($import)
     {
         $this->validate([
-            'import' => 'required', // max 10MB
+            'import' => 'required|mimes:pdf|max:10240',
         ]);
 
-        $path = 'cashflow/'.date('Y').'/'.date('m');
-        $filename = uniqid().'_'.$import->getClientOriginalName();
+        $originalName = $import->getClientOriginalName();
+        Log::info("--- START IMPORT PROCESS: $originalName ---");
+
+        $path = 'cashflow/' . date('Y/m');
+        $filename = uniqid() . '_' . $originalName;
+
+        DB::beginTransaction();
 
         try {
-            // Store the file in S3
+            Log::info("Uploading file to S3...", ['path' => $path . '/' . $filename]);
             $fullPath = $import->storeAs($path, $filename, 's3');
-            $url = Storage::disk('s3')->url($fullPath);
+            
+            $fileContent = $import->get();
+            Log::info("File size for extraction: " . strlen($fileContent) . " bytes");
 
-            // Save file metadata to the database
-            DB::beginTransaction();
+            Log::info("Starting Gemini AI Extraction...");
+            $transactions = $this->extractWithGemini($fileContent);
+            Log::info("Extraction successful. Found " . count($transactions) . " potential transactions.");
 
-            FileImport::create([
-                'user_id' => 1,
+            if (empty($transactions)) {
+                Log::warning("No transactions detected by Gemini for file: $originalName");
+                throw new \Exception('Tidak ada transaksi terdeteksi.');
+            }
+
+            Log::info("Creating FileImport record in database.");
+            $fileRecord = FileImport::create([
+                'user_id' => Auth::user()->id,
                 'filename' => $filename,
                 'size' => $import->getSize(),
                 'path' => $fullPath,
-                'url' => $url,
+                'url' => Storage::disk('s3')->url($fullPath),
             ]);
+
+            Log::info("Saving individual transactions to Cashflows table...");
+            $this->saveCashflows($transactions);
 
             DB::commit();
-            $this->loadFile();
+            Log::info("--- IMPORT SUCCESSFUL: $originalName ---");
 
-            // Emit a Livewire event for the frontend
-            $this->alert('success', 'File successfully uploaded and saved!', [
-                'position' => 'top-end',
-                'timer' => 3000,
-                'toast' => true,
-            ]);
-        } catch (\Exception $e) {
-            Storage::disk('s3')->delete($path.$filename);
+            $this->alert('success', 'Import & ekstraksi cashflow berhasil 🎉');
+
+        } catch (\Throwable $e) {
             DB::rollBack();
+            Log::error("--- IMPORT FAILED: $originalName ---");
+            Log::error("Error Message: " . $e->getMessage());
+            Log::error("Stack Trace: " . $e->getTraceAsString());
 
-            $this->alert('error', $e, [
-                'position' => 'top-end',
-                'timer' => 3000,
-                'toast' => true,
-            ]);
+            if (isset($fullPath)) {
+                Log::info("Rolling back S3: Deleting uploaded file.");
+                Storage::disk('s3')->delete($fullPath);
+            }
+
+            $this->alert('error', 'Gagal import: ' . $e->getMessage());
         }
+
+        $this->loadFile();
+    }
+
+    private function extractWithGemini(string $fileContent): array
+    {
+        $models = [
+            'gemini-2.0-flash',
+            'gemini-1.5-flash', // fallback
+        ];
+
+        $maxRetries = 3;
+
+        foreach ($models as $model) {
+            for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+
+                try {
+                    Log::info("Gemini attempt {$attempt} using model {$model}");
+                    return $this->callGeminiModel($model, $fileContent);
+
+                } catch (GeminiQuotaException $e) {
+
+                    Log::warning("Gemini quota hit (model: {$model}, attempt: {$attempt})");
+                    sleep($attempt * 5); // exponential backoff
+
+                    if ($attempt === $maxRetries) {
+                        break; // lanjut ke model berikutnya
+                    }
+                }
+            }
+        }
+
+        throw new \Exception('Quota AI sedang penuh. Silakan coba beberapa menit lagi.');
+    }
+
+    private function callGeminiModel(string $model, string $fileContent): array
+    {
+        $apiKey = config('services.gemini.key');
+        $url = "https://generativelanguage.googleapis.com/v1/models/{$model}:generateContent?key={$apiKey}";
+
+        $response = Http::timeout(60)->post($url, [
+            'contents' => [
+                [
+                    'role' => 'user',
+                    'parts' => [
+                        [
+                            'text' =>
+"Anda adalah parser laporan transaksi bank Indonesia.
+
+PDF ini berisi TABEL riwayat transaksi dengan kolom:
+- Tanggal & Waktu
+- Sumber/Tujuan
+- Rincian Transaksi
+- Catatan (opsional)
+- Jumlah
+
+TUGAS ANDA:
+- Setiap BARIS transaksi = 1 objek JSON
+- Gabungkan SEMUA informasi penting
+
+ATURAN PENGISIAN FIELD:
+- counterparty:
+  Gabungkan isi kolom **Sumber/Tujuan**
+  termasuk nama, e-wallet, nomor, kode akun jika ada
+
+- description:
+  Gabungkan:
+  - Rincian Transaksi
+  - Catatan (jika ada)
+  - ID# transaksi
+
+FORMAT OUTPUT (JSON ARRAY SAJA):
+[
+  {
+    \"date\": \"YYYY-MM-DD HH:mm\",
+    \"counterparty\": \"Sumber/Tujuan lengkap\",
+    \"description\": \"Rincian + Catatan + ID#\",
+    \"amount\": -500000
+  }
+]
+
+ATURAN WAJIB:
+- Dana masuk → amount positif
+- Dana keluar → amount negatif
+- Jangan beri penjelasan apa pun
+- Jangan gunakan markdown"
+                        ],
+                        [
+                            'inline_data' => [
+                                'mime_type' => 'application/pdf',
+                                'data' => base64_encode($fileContent),
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            'generationConfig' => [
+                'temperature' => 0.1,
+            ],
+        ]);
+
+        Log::info("json", $response->json());
+
+        if ($response->status() === 429) {
+            throw new GeminiQuotaException('Gemini quota exceeded');
+        }
+
+        if (!$response->successful()) {
+            $msg = $response->json()['error']['message'] ?? 'Gemini API error';
+            throw new \Exception($msg);
+        }
+
+        $text = $response->json()['candidates'][0]['content']['parts'][0]['text'] ?? '';
+
+        $cleanJson = trim(preg_replace('/```json|```/', '', $text));
+        $data = json_decode($cleanJson, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($data)) {
+            throw new \Exception('JSON hasil Gemini tidak valid');
+        }
+
+        return $data;
+    }
+
+
+
+    private function saveCashflows(array $transactions): void
+    {
+        $successCount = 0;
+        foreach ($transactions as $index => $trx) {
+
+            if (
+                empty($trx['date']) ||
+                empty($trx['description']) ||
+                empty($trx['counterparty']) ||
+                !isset($trx['amount'])
+            ) {
+                Log::warning("Skipping malformed transaction at index $index", $trx);
+                continue;
+            }
+
+            $amount = (int) $trx['amount'];
+            $isIncome = $amount > 0;
+
+            $text = strtolower(
+                $trx['description'] . ' ' . $trx['counterparty']
+            );
+
+            if ($this->isInvestment($text) || $this->isPindahKantong($text)) {
+                continue;
+            }
+
+            if ($isIncome) {
+                $category = CashflowCategory::SALARY;
+            } else {
+                $category = $this->detectExpenseCategory($text);
+            }
+
+            Log::debug("Processing Trx #$index", [
+                'date' => $trx['date'],
+                'amount' => $amount,
+                'category_detected' => $category,
+                'is_income' => $isIncome
+            ]);
+            Cashflow::create([
+                'user_id' => Auth::id(),
+                'cashflow_category_id' => $category,
+                'transaction_date' => Carbon::parse($trx['date']),
+                'description' => $trx['description'],
+
+                'source_account' => $isIncome
+                    ? $trx['counterparty']
+                    : 'Bank Jago',
+
+                'destination_account' => $isIncome
+                    ? 'Bank Jago'
+                    : $trx['counterparty'],
+
+                'amount' => $amount,
+            ]);
+
+            $successCount++;
+        }
+        Log::info("Database insertion finished. Saved $successCount transactions.");
+    }
+
+
+    private function isInvestment(string $text): bool
+    {
+        return str_contains($text, 'bibit')
+            || str_contains($text, 'reksa')
+            || str_contains($text, 'reksadana')
+            || str_contains($text, 'stockbit')
+            || str_contains($text, 'invest');
+    }
+
+    private function isPindahKantong(string $text): bool
+    {
+        return str_contains($text, 'pindah uang antar kantong');
+    }
+
+
+    private function detectExpenseCategory(string $text): ?int
+    {
+        return match (true) {
+
+            str_contains($text, 'gofood')
+            || str_contains($text, 'gopay')
+            || str_contains($text, 'grab')
+                => CashflowCategory::FOOD,
+
+            str_contains($text, 'alfamart')
+            || str_contains($text, 'indomaret')
+            || str_contains($text, 'uang bulanan')
+                => CashflowCategory::GROCERIES,
+
+            str_contains($text, 'shopee')
+            || str_contains($text, 'tokopedia')
+            || str_contains($text, 'dnid')
+                => CashflowCategory::ITEMS,
+
+            str_contains($text, 'netflix')
+            || str_contains($text, 'spotify')
+                => CashflowCategory::ENTERTAINMENT,
+
+            default => CashflowCategory::OTHERS,
+        };
     }
 
     public function download($id)
     {
         $file = FileImport::findOrFail($id);
 
-        $tempUrl = Storage::disk('s3')->temporaryUrl($file->path, now()->addMinutes(5));
-
-        // Tentukan path sementara di server
-        $tempFilePath = storage_path('app/temp/'.basename($file->path));
-
-        // Download file dari S3
-        file_put_contents($tempFilePath, file_get_contents($tempUrl));
-
-        // Convert PDF ke gambar per halaman menggunakan Imagick
-        $imagick = new \Imagick();
-        $imagick->readImage($tempFilePath);
-        $imagick->setResolution(300, 300);
-        $imagick->setImageFormat('png');
-
-        $transactions = [];
-        $current_balance = null;
-
-        foreach ($imagick as $index => $page) {
-            // Simpan halaman sebagai gambar sementara
-            $tempImagePath = storage_path("app/temp_page_{$index}.png");
-            $page->writeImage($tempImagePath);
-
-            // Ekstrak teks dari gambar menggunakan Tesseract
-            $text = (new TesseractOCR($tempImagePath))
-                ->lang('eng')
-                ->run();
-
-            // Hapus file sementara
-            unlink($tempImagePath);
-
-            // Pisahkan per baris
-            $lines = explode("\n", $text);
-            foreach ($lines as $line) {
-                $line = preg_replace('/\s+/', ' ', trim($line));
-
-                // Regex untuk menangkap transaksi
-                if (preg_match('/^(\d{2} \w{3} \d{4}) (\d{2}\.\d{2}) (.+?) (ID# (\w+)) ([\d,\.]+) ([\d,\.]+)$/', $line, $matches)) {
-                    $date = $matches[1];
-                    $time = $matches[2];
-                    $source_destination = trim($matches[3]);
-                    $transaction_details = $matches[4];
-                    $transaction_id = $matches[5];
-                    $amount = floatval(str_replace(',', '', $matches[6]));
-                    $balance = floatval(str_replace(',', '', $matches[7]));
-
-                    // Hitung nilai transaksi
-                    if ($current_balance !== null) {
-                        $amount = $balance - $current_balance;
-                    }
-                    $current_balance = $balance;
-
-                    // Tambahkan transaksi ke array
-                    $transactions[] = [
-                        'date' => $date,
-                        'time' => $time,
-                        'source_destination' => $source_destination,
-                        'transaction_details' => $transaction_details,
-                        'note' => '',
-                        'amount' => $amount,
-                        'balance' => $balance,
-                        'transaction_id' => $transaction_id,
-                    ];
-                }
-            }
-        }
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $transactions,
-        ]);
-
-        // $this->getPdfText($file->path);
-
-        // $url = Storage::disk('s3')->url($file->path);
-        // return redirect()->to($url);
+        $url = Storage::disk('s3')->url($file->path);
+        return redirect()->to($url);
     }
-
-    public function getPdfText($filename)
-    {
-        try {
-            // Buat URL sementara (misal 5 menit)
-            $tempUrl = Storage::disk('s3')->temporaryUrl($filename, now()->addMinutes(5));
-
-            // Tentukan path sementara di server
-            $tempFilePath = storage_path('app/temp/'.basename($filename));
-
-            // Download file dari S3
-            file_put_contents($tempFilePath, file_get_contents($tempUrl));
-
-            // Ambil teks dari file PDF lokal
-            $rawText = Pdf::getText($tempFilePath);
-            // dd($rawText);
-
-            // Hapus file sementara
-            unlink($tempFilePath);
-
-            // Proses teks untuk diubah menjadi format array
-            $processedData = $this->processPdfText($rawText);
-
-            return response()->json($processedData);
-
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
-    }
-
-    protected function processPdfText($rawText)
-    {
-        $lines = preg_split('/\r\n|\r|\n/', $rawText);
-        $transactions = [];
-        $currentTransaction = [];
-        $isTransactionData = false;
-        $headerFound = false;
-        $counter = 0;
-
-        foreach ($lines as $line) {
-            $line = trim($line);
-
-            // Cari header tabel
-            if (! $headerFound && strpos($line, 'Tanggal & Waktu') !== false) {
-                $headerFound = true;
-
-                continue;
-            }
-
-            // Mulai mengumpulkan data transaksi setelah header ditemukan
-            if ($headerFound) {
-                // Skip baris kosong atau informasi non-transaksi
-                if ($line === '' ||
-                    strpos($line, 'Halaman') !== false ||
-                    strpos($line, 'Menampilkan transaksi') !== false ||
-                    strpos($line, 'Saldo terbaru') !== false ||
-                    strpos($line, 'Info Penting') !== false) {
-                    continue;
-                }
-
-                // Deteksi tanggal transaksi (format: 25 Feb 2025)
-                if (preg_match('/^\d{1,2} [A-Za-z]{3} \d{4}$/', $line)) {
-                    // Jika ada transaksi sebelumnya, simpan
-                    if (! empty($currentTransaction)) {
-                        $transactions[] = $currentTransaction;
-                        $currentTransaction = [];
-                    }
-                    $currentTransaction['tanggal'] = $line;
-                }
-                // Deteksi waktu (format: 09.30)
-                elseif (preg_match('/^\d{2}\.\d{2}$/', $line) && isset($currentTransaction['tanggal'])) {
-                    $currentTransaction['waktu'] = str_replace('.', ':', $line);
-                }
-                // Deteksi sumber/tujuan (baris pertama setelah tanggal/waktu)
-                elseif (! isset($currentTransaction['sumber_tujuan']) &&
-                        ! empty($line) &&
-                        ! isset($currentTransaction['waktu']) &&
-                        ! preg_match('/^ID#/', $line) &&
-                        ! preg_match('/^[+-]?\d+\.\d{3}/', $line)) {
-                    $currentTransaction['sumber_tujuan'] = $line;
-                }
-                // Deteksi deskripsi transaksi
-                elseif (strpos($line, 'SHOPEE') !== false ||
-                    strpos($line, 'Bibit') !== false ||
-                    strpos($line, 'Pencairan Reksa Dana') !== false ||
-                    strpos($line, 'PT Tokopedia') !== false) {
-                    $currentTransaction['deskripsi'] = $line;
-                }
-                // Deteksi jumlah (nominal dengan + atau -)
-                elseif (preg_match('/^[+-]\d+\.\d{3}/', $line) && ! isset($currentTransaction['jumlah'])) {
-                    $currentTransaction['jumlah'] = str_replace('.', ',', $line);
-                }
-                // Deteksi saldo (nominal tanpa + atau -)
-                elseif (preg_match('/^\d+\.\d{3}/', $line) && isset($currentTransaction['jumlah']) && ! isset($currentTransaction['saldo'])) {
-                    $currentTransaction['saldo'] = str_replace('.', ',', $line);
-                    $transactions[] = $currentTransaction;
-                    $currentTransaction = [];
-                }
-            }
-        }
-
-        // Format output sesuai yang diminta
-        $result = [
-            ['No', 'Tanggal', 'Waktu', 'Sumber/Tujuan', 'Deskripsi', 'Jumlah', 'Saldo'],
-        ];
-
-        foreach ($transactions as $index => $transaction) {
-            $result[] = [
-                ($index + 1),
-                $transaction['tanggal'] ?? '',
-                $transaction['waktu'] ?? '',
-                $transaction['sumber_tujuan'] ?? '',
-                $transaction['deskripsi'] ?? '',
-                $transaction['jumlah'] ?? '',
-                $transaction['saldo'] ?? '',
-            ];
-        }
-
-        return $result;
-    }
-
-    // public function extractText($filePath)
-    // {
-    //     try {
-    //         // Set path untuk file temporary
-    //         $tempFilePath = storage_path('app/tmp/' . basename($filePath));
-
-    //         // Download file dari S3
-    //         Storage::disk('s3')->get($filePath, function ($stream) use ($tempFilePath) {
-    //             file_put_contents($tempFilePath, $stream);
-    //         });
-
-    //         // dd($tempFilePath);
-
-    //         // **Cek apakah file benar-benar ada di path**
-    //         if (!file_exists($tempFilePath)) {
-    //             throw new \Exception("File not found at $tempFilePath");
-    //         }
-
-    //         // Ekstrak teks dari file lokal
-    //         $text = Pdf::getText($tempFilePath);
-    //         dd($text);
-
-    //         // Hapus file setelah diproses untuk menghemat ruang
-    //         // unlink($tempFilePath);
-
-    //         return response()->json(['text' => $text]);
-    //     } catch (\Exception $e) {
-    //         return response()->json(['error' => $e->getMessage()]);
-    //     }
-    // }
 
     public function delete($id)
     {

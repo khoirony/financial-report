@@ -31,7 +31,11 @@ class Index extends Component
     public function mount()
     {
         $this->categories = CashflowCategory::all();
-        $this->startDate = now()->startOfMonth()->toDateString();
+        $oldestTransaction = Cashflow::where('user_id', Auth::id())->min('transaction_date');
+        $this->startDate = $oldestTransaction 
+            ? \Carbon\Carbon::parse($oldestTransaction)->toDateString() 
+            : now()->startOfMonth()->toDateString();
+
         $this->endDate = now()->endOfMonth()->toDateString();
     }
 
