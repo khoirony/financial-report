@@ -6,6 +6,7 @@ FROM php:8.2-fpm-alpine as base
 WORKDIR /var/www/html
 
 # Install dependensi sistem (termasuk Node.js & npm) dan ekstensi PHP
+# PERBAIKAN: Menambahkan 'exif' pada baris terakhir
 RUN apk add --no-cache \
     nginx \
     supervisor \
@@ -18,7 +19,7 @@ RUN apk add --no-cache \
     nodejs \
     npm \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) gd pdo pdo_mysql zip bcmath
+    && docker-php-ext-install -j$(nproc) gd pdo pdo_mysql zip bcmath exif
 
 # Hapus cache untuk menjaga ukuran image tetap kecil
 RUN rm -rf /var/cache/apk/*
@@ -34,6 +35,7 @@ COPY . .
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Install dependensi PHP tanpa dev packages & optimasi autoloader
+# (Sekarang ini akan berhasil karena ekstensi exif sudah terinstall)
 RUN composer install --optimize-autoloader --no-dev
 
 # Install dependensi Node.js dan build asset frontend
