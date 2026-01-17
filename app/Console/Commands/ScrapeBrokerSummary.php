@@ -7,6 +7,7 @@ use App\Models\BrokerSummary;
 use Spatie\Browsershot\Browsershot;
 use Symfony\Component\DomCrawler\Crawler;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class ScrapeBrokerSummary extends Command
 {
@@ -29,6 +30,7 @@ class ScrapeBrokerSummary extends Command
      */
     public function handle()
     {
+        Log::info("Starting Scrape...");
         $ticker = strtoupper($this->argument('ticker'));
         
         // Default ke hari ini jika opsi date tidak diisi
