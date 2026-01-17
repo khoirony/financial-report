@@ -59,8 +59,20 @@ RUN composer install --optimize-autoloader --no-dev --no-scripts
 # 5. Copy sisa source code aplikasi
 COPY . .
 
-# 6. Install Node Dependencies & Build Assets
-RUN npm install && npm run build && rm -rf node_modules
+# 6. Install Node Dependencies, Puppeteer & Build Assets
+# ==============================================================================
+# PERBAIKAN DI SINI:
+# 1. Set env agar Puppeteer memakai Chromium sistem (Alpine), tidak download lagi.
+# 2. Install Puppeteer.
+# 3. JANGAN hapus node_modules.
+# ==============================================================================
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+RUN npm install puppeteer \
+    && npm install \
+    && npm run build
+    # CATATAN: 'rm -rf node_modules' DIHAPUS agar puppeteer tetap ada
 
 # 7. Finalisasi Permission & Autoload
 RUN composer dump-autoload --optimize
