@@ -59,6 +59,7 @@ class Import extends Component
 
     public function updatedImport($import)
     {
+        Log::info("--- START validate ---");
         $this->validate([
             'import' => 'required|mimes:pdf|max:10240', // Max 10MB
         ]);
