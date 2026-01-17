@@ -77,6 +77,11 @@
                         <i class="text-xl text-[#700018] fas fa-chart-line"></i>
                     </x-sidebar.item>
                 </li>
+                <li class="list-none">
+                    <x-sidebar.item title="Broker Summary" menuName='{{$menuName}}' active='broker-summary' route="broker-summary">
+                        <i class="text-xl text-[#700018] fas fa-magnifying-glass-dollar"></i>
+                    </x-sidebar.item>
+                </li>
             @endcan
         </ul>
     </div>

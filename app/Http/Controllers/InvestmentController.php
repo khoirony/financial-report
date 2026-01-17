@@ -23,4 +23,9 @@ class InvestmentController extends Controller
     {
         return view('investment.analysis');
     }
+
+    public function brokerSummary()
+    {
+        return view('investment.broker-summary');
+    }
 }

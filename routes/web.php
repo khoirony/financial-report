@@ -76,5 +76,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('investment', [InvestmentController::class, 'index'])->name('investment');
         Route::get('fire-calculator', [InvestmentController::class, 'fireCalculator'])->name('fire');
         Route::get('investment-analysis', [InvestmentController::class, 'analysis'])->name('analysis');
+        Route::get('broker-summary', [InvestmentController::class, 'brokerSummary'])->name('broker-summary');
     });
 });
