@@ -50,7 +50,7 @@ class BrokerStats extends Component
                 
                 $dateStr = $currentDate->format('Y-m-d');
 
-                Artisan::call('scrape:broker-sum', [
+                Artisan::call('scrape:broker-summary', [
                     'ticker' => $ticker,
                     '--date' => $dateStr
                 ]);
