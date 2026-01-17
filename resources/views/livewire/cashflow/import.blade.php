@@ -1,90 +1,138 @@
 <div>
-    <main class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
-        <div class="mb-10 flex justify-between">
-            <h1 class="text-xl md:text-3xl font-semibold">Import Data</h1>
+    <main class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Import Rekening Koran</h1>
+                <p class="text-gray-500 text-sm mt-1">
+                    Upload file PDF (Bank Statement) Anda. AI akan otomatis mendeteksi dan mengkategorikan transaksi.
+                </p>
+            </div>
         </div>
 
-        <div id="FileUpload" class="relative">
-            <input type="file"
-                class="absolute inset-0 z-10 m-0 p-0 w-full h-full outline-none opacity-0 cursor-pointer"
-                x-on:dragover="$el.classList.add('active')"
-                x-on:dragleave="$el.classList.remove('active')"
-                x-on:drop="$el.classList.remove('active')"
-                wire:model.lazy="import"
-            />
-                <x-content-upload
-                    class="!space-y-2"
-                    classTitle="hidden"
-                    classOr="hidden"
-                    classButton="hidden"
-                    classDescription="hidden"
-                    classMaxFile="hidden"
-                >
-                <div class="flex flex-col justify-center space-y-2">
-                    <div class="px-4 text-gray-900 text-xl text-center font-bold">
-                        Click or Drop file in the area above to start upload
-                    </div>
-                    <div class="px-4 text-xs text-gray-400 text-center">
-                        Supported file types: CSV and TXT <br>
-                        Max file size: 5 MB
-                    </div>
+        <div 
+            x-data="{ isDropping: false }"
+            x-on:dragover.prevent="isDropping = true"
+            x-on:dragleave.prevent="isDropping = false"
+            x-on:drop.prevent="isDropping = false"
+            class="relative w-full group"
+        >
+            <div 
+                class="relative flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-xl transition-all duration-200 ease-in-out bg-gray-50"
+                :class="isDropping ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:bg-gray-100'"
+            >
+                
+                <div wire:loading.flex wire:target="import" class="absolute inset-0 z-50 flex-col items-center justify-center bg-white/90 rounded-xl backdrop-blur-sm">
+                    <svg class="w-12 h-12 text-blue-600 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="mt-4 text-sm font-medium text-gray-700 animate-pulse">Mengupload & Menganalisa dengan AI...</p>
+                    <p class="text-xs text-gray-500 mt-1">Mohon tunggu, jangan tutup halaman ini.</p>
                 </div>
-            </x-content-upload>
-        </div>
 
-        <div class="bg-white rounded-lg border border-bright-gray overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                <h2 class="text-lg font-semibold text-gray-900">All Import</h2>
-                <div class="relative">
-                    {{-- <select x-model="transactionFilter" @change="filterTransactions" class="block appearance-none bg-white border border-gray-300 text-gray-700 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
-                        <option value="all">All Transactions</option>
-                        <option value="income">Income Only</option>
-                        <option value="expense">Expenses Only</option>
-                    </select> --}}
+                <input 
+                    type="file" 
+                    class="absolute inset-0 z-10 w-full h-full opacity-0 cursor-pointer"
+                    wire:model="import"
+                    accept=".pdf"
+                    wire:loading.attr="disabled"
+                />
+
+                <div wire:loading.remove wire:target="import" class="flex flex-col items-center justify-center pt-5 pb-6 text-center">
+                    <div class="p-4 mb-3 rounded-full bg-gray-100 text-gray-400 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
+                        <svg aria-hidden="true" class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                    </div>
+                    <p class="mb-2 text-sm text-gray-700">
+                        <span class="font-semibold">Klik untuk upload</span> atau drag and drop
+                    </p>
+                    <p class="text-xs text-gray-500">PDF Only (Bank Statement) - Max 10 MB</p>
                 </div>
             </div>
+
+            @error('import') 
+                <div class="mt-3 p-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 animate-pulse">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                    {{ $message }}
+                </div>
+            @enderror
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50/50 flex justify-between items-center">
+                <h2 class="text-base font-semibold text-gray-900">Riwayat Import File</h2>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-700">
+                    {{ count($fileImports) }} Files
+                </span>
+            </div>
+            
             <div class="overflow-x-auto">
-                <x-table.table>
-                    <x-table.header>
-                        <x-table.row>
-                            <x-table.head>Name</x-table.head>
-                            <x-table.head>Size</x-table.head>
-                            <x-table.head>Uploaded Date</x-table.head>
-                            <x-table.head>Action</x-table.head>
-                        </x-table.row>
-                    </x-table.header>
-                    <x-table.body>
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File Name</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uploaded At</th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
                         @forelse($fileImports as $file)
-                            <x-table.row class="even:bg-gray-50 odd:bg-white">
-                                <x-table.data wire:click="download({{ $file->id }})" style="cursor: pointer;" class="">
-                                    <div class="flex gap-4 items-center text-rose-900 hover:text-blue-500">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                            <path fill-rule="evenodd" clip-rule="evenodd" d="M14.25 2.5C14.25 2.4337 14.2237 2.37011 14.1768 2.32322C14.1299 2.27634 14.0663 2.25 14 2.25H7C6.27065 2.25 5.57118 2.53973 5.05546 3.05546C4.53973 3.57118 4.25 4.27065 4.25 5V19C4.25 19.7293 4.53973 20.4288 5.05546 20.9445C5.57118 21.4603 6.27065 21.75 7 21.75H17C17.7293 21.75 18.4288 21.4603 18.9445 20.9445C19.4603 20.4288 19.75 19.7293 19.75 19V9.147C19.75 9.0807 19.7237 9.01711 19.6768 8.97022C19.6299 8.92334 19.5663 8.897 19.5 8.897H15C14.8011 8.897 14.6103 8.81798 14.4697 8.67733C14.329 8.53668 14.25 8.34591 14.25 8.147V2.5ZM15 12.25C15.1989 12.25 15.3897 12.329 15.5303 12.4697C15.671 12.6103 15.75 12.8011 15.75 13C15.75 13.1989 15.671 13.3897 15.5303 13.5303C15.3897 13.671 15.1989 13.75 15 13.75H9C8.80109 13.75 8.61032 13.671 8.46967 13.5303C8.32902 13.3897 8.25 13.1989 8.25 13C8.25 12.8011 8.32902 12.6103 8.46967 12.4697C8.61032 12.329 8.80109 12.25 9 12.25H15ZM15 16.25C15.1989 16.25 15.3897 16.329 15.5303 16.4697C15.671 16.6103 15.75 16.8011 15.75 17C15.75 17.1989 15.671 17.3897 15.5303 17.5303C15.3897 17.671 15.1989 17.75 15 17.75H9C8.80109 17.75 8.61032 17.671 8.46967 17.5303C8.32902 17.3897 8.25 17.1989 8.25 17C8.25 16.8011 8.32902 16.6103 8.46967 16.4697C8.61032 16.329 8.80109 16.25 9 16.25H15Z" fill="currentColor"/>
-                                            <path d="M15.75 2.824C15.75 2.64 15.943 2.523 16.086 2.638C16.207 2.736 16.316 2.85 16.409 2.98L19.422 7.177C19.49 7.273 19.416 7.397 19.298 7.397H16C15.9337 7.397 15.8701 7.37066 15.8232 7.32378C15.7763 7.2769 15.75 7.21331 15.75 7.147V2.824Z" fill="currentColor"/>
-                                        </svg>
-                                        <h1>{{$file->filename}}</h1>
+                            <tr class="hover:bg-gray-50 transition-colors group">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center cursor-pointer" wire:click="download({{ $file->id }})">
+                                        <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-lg bg-red-50 text-red-500 group-hover:bg-red-100 transition-colors">
+                                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                            </svg>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900 group-hover:text-blue-600 truncate max-w-xs" title="{{ $file->filename }}">
+                                                {{ Str::limit($file->filename, 40) }}
+                                            </div>
+                                            <div class="text-xs text-gray-400">Click to download</div>
+                                        </div>
                                     </div>
-                                </x-table.data>
-                                <x-table.data>{{ $file->size }}</x-table.data>
-                                <x-table.data>{{ $file->created_at }}</x-table.data>
-                                <x-table.data>
-                                    <button wire:click.stop="delete({{ $file->id }})"
-                                        style="cursor: pointer;" 
-                                        class="text-red-600 hover:text-red-900"
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $this->formatSize($file->size) }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ \Carbon\Carbon::parse($file->created_at)->format('d M Y, H:i') }}
+                                    <span class="block text-xs text-gray-400">{{ \Carbon\Carbon::parse($file->created_at)->diffForHumans() }}</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <button 
+                                        wire:click.stop="delete({{ $file->id }})"
+                                        wire:confirm="Yakin ingin menghapus file ini? Transaksi yang sudah diimport tidak akan terhapus."
+                                        class="text-gray-400 hover:text-red-600 transition-colors p-2 rounded-full hover:bg-red-50"
+                                        title="Hapus File"
                                     >
-                                        <i class="fas fa-trash"></i>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
                                     </button>
-                                </x-table.data>
-                            </x-table.row>
+                                </td>
+                            </tr>
                         @empty
-                            <x-table.row>
-                                <x-table.data colspan="4">
-                                    <div class="text-center">No Data Found</div>
-                                </x-table.data>
-                            </x-table.row>
+                            <tr>
+                                <td colspan="4" class="px-6 py-12 text-center">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <div class="p-3 rounded-full bg-gray-50 mb-3">
+                                            <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                            </svg>
+                                        </div>
+                                        <h3 class="text-sm font-medium text-gray-900">Belum ada file</h3>
+                                        <p class="text-gray-500 text-sm mt-1">Upload file pertama Anda untuk melihat history.</p>
+                                    </div>
+                                </td>
+                            </tr>
                         @endforelse
-                    </x-table.body>
-                </x-table.table>
+                    </tbody>
+                </table>
             </div>
         </div>
     </main>

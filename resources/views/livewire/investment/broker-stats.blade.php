@@ -47,11 +47,11 @@
                                     <input type="date" wire:model.live="endDate" class="rounded-lg border border-gray-300 text-sm font-light w-full">
                                 </div>
 
-                                <div class="hidden md:block">
+                                <div class="w-full md:w-1/5">
                                     <button 
                                         wire:click="syncData" 
                                         wire:loading.attr="disabled"
-                                        class="h-[38px] inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 disabled:opacity-25 transition ease-in-out duration-150 shadow-sm whitespace-nowrap"
+                                        class="h-[38px] w-full justify-center inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 disabled:opacity-25 transition ease-in-out duration-150 shadow-sm whitespace-nowrap"
                                     >
                                         <span wire:loading.remove wire:target="syncData">Sync Data</span>
                                         <span wire:loading wire:target="syncData">
